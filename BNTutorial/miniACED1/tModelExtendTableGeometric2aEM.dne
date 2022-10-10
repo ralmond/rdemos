@@ -1,0 +1,140 @@
+// ~->[DNET-1]->~
+
+// File created by an unlicensed user using Netica 5.04 on 04/12/2022 at 17:59:43.
+
+bnet tModelExtendTableGeometric2aEM {
+autoupdate = FALSE;
+title = "tModelExtendTableGeometric2a";
+whenchanged = 1649800783;
+
+visual V27 {
+	defdispform = BELIEFBARS;
+	nodelabeling = TITLE;
+	NodeMaxNumEntries = 50;
+	nodefont = font {shape= "Arial"; size= 9;};
+	linkfont = font {shape= "Arial"; size= 9;};
+	resolution = 72;
+	drawingbounds = (1080, 720);
+	showpagebreaks = FALSE;
+	usegrid = TRUE;
+	gridspace = (6, 6);
+	NodeSet Node {BuiltIn = 1; Color = 0x00E1E1E1;};
+	NodeSet Nature {BuiltIn = 1; Color = 0x00F8EED2;};
+	NodeSet Deterministic {BuiltIn = 1; Color = 0x00D3CAA6;};
+	NodeSet Finding {BuiltIn = 1; Color = 0x00C8C8C8;};
+	NodeSet Constant {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet ConstantValue {BuiltIn = 1; Color = 0x00FFFFB4;};
+	NodeSet Utility {BuiltIn = 1; Color = 0x00FFBDBD;};
+	NodeSet Decision {BuiltIn = 1; Color = 0x00DEE8FF;};
+	NodeSet Documentation {BuiltIn = 1; Color = 0x00F0FAFA;};
+	NodeSet Title {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet onodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet pnodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet Observables {Disabled = 1; Color = 0x00C8C8C8;};
+	PrinterSetting A {
+		margins = (1270, 1270, 1270, 1270);
+		};
+	};
+user U1 {
+	Hub = "MiniACEDPM";
+	Pathname = "ModelTableExtendMedEM.dne";
+	};
+
+param X_ModelGeometric_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "ModelGeometric";
+	whenchanged = 1649800732;
+	};
+
+param X_TableGeometric_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "TableGeometric";
+	whenchanged = 1649800732;
+	};
+
+param X_ExtendGeometric_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "ExtendGeometric";
+	whenchanged = 1649800732;
+	};
+
+node tModelExtendTableGeome_82 {
+	kind = NATURE;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (Yes, No);
+	levels = (1, 0);
+	inputs = (ModelGeometric, TableGeometric, ExtendGeometric);
+	parents = (X_ModelGeometric_1, X_TableGeometric_1, X_ExtendGeometric_1);
+	probs = 
+		// Yes          No            // ModelGeometric TableGeometric ExtendGeometric 
+		  (0.9652202,   0.0347798,    // High           High           High            
+		   0.9148074,   0.08519255,   // High           High           Medium          
+		   0.8060085,   0.1939915,    // High           High           Low             
+		   0.9148074,   0.08519255,   // High           Medium         High            
+		   0.8060085,   0.1939915,    // High           Medium         Medium          
+		   0.6165097,   0.3834903,    // High           Medium         Low             
+		   0.8060085,   0.1939915,    // High           Low            High            
+		   0.6165097,   0.3834903,    // High           Low            Medium          
+		   0.3834903,   0.6165097,    // High           Low            Low             
+		   0.8697828,   0.1302172,    // Medium         High           High            
+		   0.7210186,   0.2789814,    // Medium         High           Medium          
+		   0.5,         0.5,          // Medium         High           Low             
+		   0.7210186,   0.2789814,    // Medium         Medium         High            
+		   0.5,         0.5,          // Medium         Medium         Medium          
+		   0.2789814,   0.7210186,    // Medium         Medium         Low             
+		   0.5,         0.5,          // Medium         Low            High            
+		   0.2789814,   0.7210186,    // Medium         Low            Medium          
+		   0.1302172,   0.8697828,    // Medium         Low            Low             
+		   0.6165097,   0.3834903,    // Low            High           High            
+		   0.3834903,   0.6165097,    // Low            High           Medium          
+		   0.1939915,   0.8060085,    // Low            High           Low             
+		   0.3834903,   0.6165097,    // Low            Medium         High            
+		   0.1939915,   0.8060085,    // Low            Medium         Medium          
+		   0.08519255,  0.9148074,    // Low            Medium         Low             
+		   0.1939915,   0.8060085,    // Low            Low            High            
+		   0.08519255,  0.9148074,    // Low            Low            Medium          
+		   0.0347798,   0.9652202);   // Low            Low            Low             ;
+	numcases = 10;
+	whenchanged = 1649800783;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"partialCredit\"";
+		lnAlphas = "c(ModelGeometric = 0.405465108108164, TableGeometric = 0, ExtendGeometric = 0 )";
+		betas = "0";
+		Truename = "tModelExtendTableGeometric2a";
+		};
+	visual V27 {
+		center = (858, 528);
+		height = 1;
+		link 1 {
+			labelposn = (918, 470, 1007, 485);
+			path = ((918, 468), (894, 492));
+			};
+		link 2 {
+			labelposn = (798, 468, 884, 483);
+			path = ((798, 468), (822, 492));
+			};
+		link 3 {
+			labelposn = (860, 468, 953, 483);
+			path = ((858, 468), (858, 492));
+			};
+		};
+	};
+NodeSet onodes {Nodes = (tModelExtendTableGeome_82);};
+NodeSet pnodes {Nodes = (tModelExtendTableGeome_82);};
+NodeSet Observables {Nodes = (tModelExtendTableGeome_82);};
+};

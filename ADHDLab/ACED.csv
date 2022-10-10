@@ -1,0 +1,291 @@
+SID,Cond_code,Level_Code,pre_scaled,post_scaled,BNscore
+S052,"Adaptive, Accuracy Only",Academic,44,78,0.747
+S053,"Adaptive, Full Feedback",Academic,45,39,-0.999
+S054,"Linear, Full Feedback",Academic,70,69,0.687
+S055,"Adaptive, Accuracy Only",Academic,48,53,-1
+S056,"Adaptive, Full Feedback",Academic,41,51,-0.974
+S057,"Linear, Full Feedback",Academic,48,67,0.139
+S058,"Adaptive, Accuracy Only",Academic,56,54,-0.428
+S059,"Adaptive, Full Feedback",Academic,45,53,-0.947
+S060,"Linear, Full Feedback",Academic,50,51,0.001
+S061,"Adaptive, Accuracy Only",Academic,60,50,-0.903
+S062,"Adaptive, Full Feedback",Academic,47,54,-0.998
+S063,"Adaptive, Accuracy Only",Academic,50,54,-0.139
+S064,"Adaptive, Full Feedback",Academic,69,73,0.953
+S065,"Linear, Full Feedback",Academic,47,66,-0.66
+S066,"Adaptive, Accuracy Only",Academic,39,53,-0.884
+S067,"Adaptive, Full Feedback",Academic,50,48,-1
+S068,"Linear, Full Feedback",Academic,54,50,-0.993
+S074,"Adaptive, Accuracy Only",Academic,61,60,-0.991
+S075,"Adaptive, Full Feedback",Academic,45,61,0.554
+S076,"Linear, Full Feedback",Academic,53,51,0.115
+S077,"Adaptive, Accuracy Only",Academic,70,75,-0.569
+S078,"Adaptive, Full Feedback",Academic,53,54,-0.94
+S079,"Linear, Full Feedback",Academic,72,56,-0.348
+S080,"Adaptive, Accuracy Only",Academic,45,47,-1
+S081,"Adaptive, Full Feedback",Academic,61,54,-0.953
+S082,"Linear, Full Feedback",Academic,57,39,-0.98
+S083,"Adaptive, Accuracy Only",Academic,63,41,-0.999
+S084,"Adaptive, Full Feedback",Academic,56,48,-0.987
+S085,"Linear, Full Feedback",Academic,51,56,-0.738
+S086,"Adaptive, Accuracy Only",Academic,63,67,0.752
+S087,"Adaptive, Full Feedback",Academic,53,51,-0.835
+S088,"Linear, Full Feedback",Academic,48,58,-0.984
+S089,"Adaptive, Accuracy Only",Academic,42,61,-0.987
+S090,"Adaptive, Full Feedback",Academic,56,51,-1
+S091,"Linear, Full Feedback",Academic,57,67,-0.999
+S097,"Adaptive, Accuracy Only",Academic,61,57,0.278
+S098,"Adaptive, Full Feedback",Academic,54,64,-0.999
+S099,"Linear, Full Feedback",Academic,41,51,-0.722
+S100,"Adaptive, Accuracy Only",Academic,63,58,-0.998
+S101,"Adaptive, Full Feedback",Academic,56,48,-0.999
+S102,"Linear, Full Feedback",Academic,63,67,0.04
+S103,"Adaptive, Accuracy Only",Academic,61,78,0.869
+S104,"Adaptive, Full Feedback",Academic,42,53,-1
+S105,"Linear, Full Feedback",Academic,50,54,-0.626
+S106,"Adaptive, Accuracy Only",Academic,57,73,0.266
+S107,"Adaptive, Full Feedback",Academic,47,45,-0.999
+S108,"Linear, Full Feedback",Academic,57,73,0.844
+S109,"Adaptive, Accuracy Only",Academic,50,54,0.688
+S110,"Adaptive, Full Feedback",Academic,63,76,0.915
+S111,"Linear, Full Feedback",Academic,56,54,-0.998
+S112,"Adaptive, Accuracy Only",Academic,54,61,0.693
+S113,"Adaptive, Full Feedback",Academic,44,63,0.868
+S114,"Linear, Full Feedback",Academic,66,70,0.28
+S119,"Adaptive, Accuracy Only",Honors,58,63,-0.0209999999999999
+S120,"Adaptive, Full Feedback",Honors,51,70,0.307
+S121,"Linear, Full Feedback",Honors,70,81,0.789
+S122,"Adaptive, Accuracy Only",Honors,75,58,0.00700000000000001
+S123,"Adaptive, Full Feedback",Honors,56,72,0.983
+S124,"Linear, Full Feedback",Honors,57,70,-0.016
+S125,"Adaptive, Accuracy Only",Honors,50,60,-0.994
+S126,"Adaptive, Full Feedback",Honors,45,47,-1
+S127,"Linear, Full Feedback",Honors,64,60,-0.02
+S128,"Adaptive, Accuracy Only",Honors,54,67,-0.245
+S129,"Adaptive, Full Feedback",Honors,78,84,0.998
+S130,"Linear, Full Feedback",Honors,45,67,-0.0920000000000001
+S131,"Adaptive, Accuracy Only",Honors,58,75,0.892
+S132,"Adaptive, Full Feedback",Honors,57,61,-0.888
+S133,"Linear, Full Feedback",Honors,50,54,-0.537
+S134,"Adaptive, Accuracy Only",Honors,60,67,-0.579
+S135,"Adaptive, Full Feedback",Honors,56,60,0.878
+S136,"Linear, Full Feedback",Honors,60,64,0.896
+S140,"Adaptive, Accuracy Only",Honors,39,48,-0.438
+S141,"Adaptive, Full Feedback",Honors,57,53,0.983
+S142,"Linear, Full Feedback",Honors,50,57,-0.773
+S143,"Adaptive, Accuracy Only",Honors,63,67,0.926
+S144,"Adaptive, Full Feedback",Honors,64,69,0.995
+S145,"Linear, Full Feedback",Honors,45,47,-0.948
+S146,"Adaptive, Accuracy Only",Honors,56,57,-0.178
+S147,"Adaptive, Full Feedback",Honors,66,64,0.957
+S148,"Linear, Full Feedback",Honors,50,66,0.773
+S149,"Adaptive, Accuracy Only",Honors,60,70,0.742
+S150,"Adaptive, Full Feedback",Honors,53,72,-0.046
+S151,"Linear, Full Feedback",Honors,57,70,0.188
+S152,"Adaptive, Accuracy Only",Honors,73,60,0.748
+S153,"Adaptive, Full Feedback",Honors,48,70,-0.997
+S154,"Linear, Full Feedback",Honors,56,72,0.983
+S155,"Adaptive, Accuracy Only",Honors,45,58,-0.185
+S156,"Adaptive, Full Feedback",Honors,67,72,0.108
+S157,"Adaptive, Accuracy Only",Academic,47,54,-0.983
+S158,"Adaptive, Full Feedback",Academic,57,67,0.604
+S159,"Linear, Full Feedback",Academic,47,48,-0.802
+S160,"Adaptive, Accuracy Only",Academic,45,53,-0.409
+S161,"Adaptive, Full Feedback",Academic,44,42,-0.705
+S162,"Linear, Full Feedback",Academic,48,58,-1
+S163,"Adaptive, Accuracy Only",Academic,44,66,-0.82
+S164,"Adaptive, Full Feedback",Academic,51,50,-0.826
+S165,"Linear, Full Feedback",Academic,44,60,-0.997
+S166,"Adaptive, Accuracy Only",Academic,36,58,-0.999
+S167,"Adaptive, Full Feedback",Academic,41,57,-0.953
+S168,"Linear, Full Feedback",Academic,33,50,-0.999
+S169,"Adaptive, Accuracy Only",Academic,36,47,-0.978
+S170,"Adaptive, Full Feedback",Academic,51,53,-0.938
+S171,"Linear, Full Feedback",Academic,61,54,-0.69
+S177,"Adaptive, Accuracy Only",Special Ed (Part 1),36,45,-1
+S178,"Adaptive, Full Feedback",Special Ed (Part 1),51,53,-0.58
+S179,"Linear, Full Feedback",Special Ed (Part 1),44,45,-0.194
+S180,"Adaptive, Accuracy Only",Special Ed (Part 1),48,50,-0.977
+S181,"Adaptive, Full Feedback",Special Ed (Part 1),53,48,-1
+S182,"Linear, Full Feedback",Special Ed (Part 1),54,56,-0.736
+S183,"Adaptive, Accuracy Only",Special Ed (Part 1),47,60,-0.997
+S184,"Adaptive, Full Feedback",Special Ed (Part 1),42,47,-0.999
+S186,"Adaptive, Accuracy Only",Special Ed (Part 1),48,41,-0.893
+S187,"Adaptive, Full Feedback",Special Ed (Part 1),NA,NA,-0.998
+S188,"Linear, Full Feedback",Special Ed (Part 1),NA,NA,-0.999
+S189,"Adaptive, Accuracy Only",Special Ed (Part 1),41,39,-1
+S194,"Adaptive, Accuracy Only",Special Ed (Part 1),41,51,-1
+S195,"Adaptive, Full Feedback",Special Ed (Part 1),51,44,-0.999
+S196,"Linear, Full Feedback",Special Ed (Part 1),36,45,-0.57
+S197,"Adaptive, Accuracy Only",Special Ed (Part 1),36,44,-1
+S198,"Adaptive, Full Feedback",Special Ed (Part 1),44,48,-1
+S199,"Linear, Full Feedback",Special Ed (Part 1),48,47,-0.998
+S200,"Adaptive, Accuracy Only",Special Ed (Part 1),44,45,-0.54
+S201,"Adaptive, Full Feedback",Special Ed (Part 1),36,41,-0.936
+S202,"Linear, Full Feedback",Special Ed (Part 1),39,42,-0.688
+S203,"Adaptive, Accuracy Only",Special Ed (Part 1),33,30,-0.999
+S204,"Adaptive, Full Feedback",Special Ed (Part 1),53,57,-0.802
+S208,"Adaptive, Accuracy Only",Academic,47,45,0.53
+S209,"Adaptive, Full Feedback",Academic,48,58,-0.655
+S210,"Linear, Full Feedback",Academic,50,57,-0.945
+S211,"Adaptive, Accuracy Only",Academic,42,44,-0.998
+S212,"Adaptive, Full Feedback",Academic,58,57,-0.991
+S213,"Linear, Full Feedback",Academic,45,53,-0.987
+S214,"Adaptive, Accuracy Only",Academic,50,57,-0.87
+S215,"Adaptive, Full Feedback",Academic,69,67,0.761
+S216,"Linear, Full Feedback",Academic,64,78,0.968
+S217,"Adaptive, Accuracy Only",Academic,51,56,-0.633
+S218,"Adaptive, Full Feedback",Academic,61,69,0.0639999999999999
+S219,"Linear, Full Feedback",Academic,66,73,-0.13
+S220,"Adaptive, Accuracy Only",Academic,64,69,0.575
+S221,"Adaptive, Full Feedback",Academic,60,67,-0.343
+S222,"Linear, Full Feedback",Academic,41,36,-1
+S223,"Adaptive, Accuracy Only",Academic,54,61,-0.99
+S228,"Adaptive, Accuracy Only",Academic,47,51,-0.877
+S229,"Adaptive, Full Feedback",Academic,54,61,-0.948
+S230,"Linear, Full Feedback",Academic,44,63,0.888
+S231,"Adaptive, Accuracy Only",Academic,57,76,0.463
+S232,"Adaptive, Full Feedback",Academic,44,72,-0.224
+S233,"Linear, Full Feedback",Academic,57,61,0.976
+S234,"Adaptive, Accuracy Only",Academic,50,45,-0.998
+S235,"Adaptive, Full Feedback",Academic,54,61,-0.157
+S236,"Linear, Full Feedback",Academic,58,45,-0.997
+S237,"Adaptive, Accuracy Only",Academic,42,64,-0.682
+S238,"Adaptive, Full Feedback",Academic,47,60,-0.355
+S239,"Linear, Full Feedback",Academic,54,56,0.751
+S240,"Adaptive, Accuracy Only",Academic,50,60,-0.995
+S241,"Adaptive, Full Feedback",Academic,27,53,-0.0569999999999999
+S242,"Linear, Full Feedback",Academic,44,54,0.106
+S243,"Adaptive, Accuracy Only",Academic,60,64,-0.591
+S249,"Adaptive, Accuracy Only",Academic,41,54,-1
+S250,"Adaptive, Full Feedback",Academic,57,53,-0.35
+S251,"Linear, Full Feedback",Academic,41,51,-0.81
+S252,"Adaptive, Accuracy Only",Academic,51,47,-1
+S253,"Adaptive, Full Feedback",Academic,53,63,-0.994
+S254,"Linear, Full Feedback",Academic,69,73,0.985
+S255,"Adaptive, Accuracy Only",Academic,50,60,0.606
+S256,"Adaptive, Full Feedback",Academic,36,36,-0.998
+S257,"Linear, Full Feedback",Academic,61,57,-0.959
+S258,"Adaptive, Accuracy Only",Academic,54,56,-0.588
+S259,"Adaptive, Full Feedback",Academic,61,78,0.256
+S260,"Linear, Full Feedback",Academic,57,64,-0.333
+S261,"Adaptive, Accuracy Only",Academic,53,45,-0.846
+S262,"Adaptive, Full Feedback",Academic,51,56,-0.911
+S263,"Linear, Full Feedback",Academic,58,54,-0.488
+S269,"Adaptive, Accuracy Only",English Language Learners,36,39,-0.663
+S270,"Adaptive, Full Feedback",English Language Learners,27,39,-0.832
+S271,"Linear, Full Feedback",English Language Learners,33,36,-0.976
+S272,"Adaptive, Accuracy Only",English Language Learners,30,44,-0.988
+S273,"Adaptive, Full Feedback",English Language Learners,33,39,-1
+S274,"Linear, Full Feedback",English Language Learners,36,39,-1
+S275,"Adaptive, Accuracy Only",English Language Learners,27,33,-1
+S276,"Adaptive, Full Feedback",English Language Learners,36,41,-1
+S277,"Linear, Full Feedback",English Language Learners,39,51,-1
+S278,"Adaptive, Accuracy Only",English Language Learners,48,44,-1
+S279,"Adaptive, Full Feedback",English Language Learners,27,42,-0.999
+S280,"Linear, Full Feedback",English Language Learners,30,47,-0.999
+S281,"Adaptive, Accuracy Only",English Language Learners,33,42,-0.996
+S282,"Adaptive, Full Feedback",English Language Learners,33,39,-0.946
+S283,"Linear, Full Feedback",English Language Learners,41,48,-1
+S284,"Adaptive, Accuracy Only",English Language Learners,36,39,-1
+S285,"Adaptive, Full Feedback",English Language Learners,50,45,-1
+S291,"Adaptive, Accuracy Only",Special Ed (Part 2),47,33,-1
+S292,"Adaptive, Full Feedback",Special Ed (Part 2),39,47,-1
+S293,"Linear, Full Feedback",Regular,41,39,-0.999
+S294,"Adaptive, Accuracy Only",Regular,57,50,-0.988
+S295,"Adaptive, Full Feedback",Regular,41,51,-0.993
+S296,"Linear, Full Feedback",Regular,48,39,-0.897
+S297,"Adaptive, Accuracy Only",Regular,44,51,-0.996
+S298,"Adaptive, Full Feedback",Regular,48,50,-0.00299999999999989
+S299,"Linear, Full Feedback",Regular,47,33,-0.988
+S300,"Adaptive, Accuracy Only",Regular,54,41,-1
+S301,"Adaptive, Full Feedback",Regular,53,48,-0.995
+S302,"Linear, Full Feedback",Regular,45,50,-0.183
+S303,"Adaptive, Accuracy Only",Regular,44,57,-0.985
+S304,"Adaptive, Full Feedback",Regular,39,58,-0.148
+S305,"Linear, Full Feedback",Regular,53,60,0.962
+S306,"Adaptive, Accuracy Only",Regular,54,53,-0.869
+S307,"Adaptive, Full Feedback",Special Ed (Part 2),44,57,-1
+S308,"Linear, Full Feedback",Special Ed (Part 2),42,36,-1
+S315,"Adaptive, Accuracy Only",Special Ed (Part 2),53,36,-0.995
+S316,"Adaptive, Full Feedback",Regular,45,61,0.045
+S317,"Linear, Full Feedback",Regular,47,60,-0.986
+S318,"Adaptive, Accuracy Only",Regular,45,53,-0.998
+S319,"Adaptive, Full Feedback",Regular,44,45,-0.999
+S320,"Linear, Full Feedback",Regular,51,56,-0.743
+S323,"Adaptive, Accuracy Only",Academic,53,69,0.966
+S324,"Adaptive, Full Feedback",Academic,48,50,-0.999
+S325,"Linear, Full Feedback",Academic,56,72,0.992
+S326,"Adaptive, Accuracy Only",Academic,57,67,-0.224
+S327,"Adaptive, Full Feedback",Academic,36,48,-1
+S328,"Linear, Full Feedback",Academic,60,50,0.11
+S329,"Adaptive, Accuracy Only",Academic,47,33,-0.993
+S330,"Adaptive, Full Feedback",Academic,54,61,-0.75
+S331,"Linear, Full Feedback",Academic,53,42,-0.999
+S332,"Adaptive, Accuracy Only",Academic,54,67,-0.316
+S333,"Adaptive, Full Feedback",Academic,67,75,0.459
+S334,"Linear, Full Feedback",Academic,45,64,-0.952
+S335,"Adaptive, Accuracy Only",Academic,61,66,0.369
+S336,"Adaptive, Full Feedback",Special Ed (Part 2),39,47,-1
+S337,"Linear, Full Feedback",Special Ed (Part 2),44,51,-1
+S338,"Adaptive, Accuracy Only",Academic,51,58,-0.978
+S069,Control,Academic,50,63,NA
+S070,Control,Academic,42,56,NA
+S071,Control,Academic,64,60,NA
+S072,Control,Academic,51,61,NA
+S073,Control,Academic,42,56,NA
+S092,Control,Academic,51,61,NA
+S093,Control,Academic,53,48,NA
+S094,Control,Academic,50,51,NA
+S095,Control,Academic,47,60,NA
+S096,Control,Academic,67,72,NA
+S115,Control,Academic,69,58,NA
+S116,Control,Academic,54,56,NA
+S117,Control,Academic,45,56,NA
+S118,Control,Academic,50,51,NA
+S137,Control,Honors,67,78,NA
+S138,Control,Honors,51,53,NA
+S139,Control,Honors,61,72,NA
+S172,Control,Academic,64,42,NA
+S173,Control,Academic,42,41,NA
+S174,Control,Academic,50,51,NA
+S175,Control,Academic,50,48,NA
+S176,Control,Academic,54,41,NA
+S190,Control,Special Ed (Part 1),44,45,NA
+S191,Control,Special Ed (Part 1),54,44,NA
+S192,Control,Special Ed (Part 1),44,36,NA
+S193,Control,Special Ed (Part 1),54,61,NA
+S205,Control,Special Ed (Part 1),56,45,NA
+S206,Control,Special Ed (Part 1),51,53,NA
+S207,Control,Special Ed (Part 1),61,45,NA
+S224,Control,Academic,47,54,NA
+S225,Control,Academic,36,56,NA
+S226,Control,Academic,64,66,NA
+S227,Control,Academic,42,53,NA
+S244,Control,Academic,70,57,NA
+S245,Control,Academic,72,78,NA
+S246,Control,Academic,41,45,NA
+S247,Control,Academic,45,41,NA
+S248,Control,Academic,47,48,NA
+S264,Control,Academic,58,54,NA
+S265,Control,Academic,54,61,NA
+S266,Control,Academic,50,51,NA
+S267,Control,Academic,63,76,NA
+S268,Control,Academic,58,72,NA
+S286,Control,English Language Learners,27,27,NA
+S287,Control,English Language Learners,30,36,NA
+S288,Control,English Language Learners,27,45,NA
+S289,Control,English Language Learners,33,50,NA
+S290,Control,English Language Learners,33,39,NA
+S309,Control,Regular,41,36,NA
+S310,Control,Regular,45,36,NA
+S311,Control,Regular,41,33,NA
+S312,Control,Regular,36,47,NA
+S313,Control,Regular,44,36,NA
+S314,Control,Regular,41,51,NA
+S321,Control,Regular,33,33,NA
+S322,Control,Regular,42,50,NA
+S339,Control,Special Ed (Part 2),27,27,NA
+S340,Control,Academic,48,58,NA
+S341,Control,Academic,53,57,NA
+S342,Control,Academic,48,44,NA

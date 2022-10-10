@@ -1,0 +1,141 @@
+---
+title: "CART Stuff"
+output: html_notebook
+---
+
+## Useful packages:
+
+```{r package}
+library(rpart)
+library(rpart.plot)
+
+#install.packages("e1071")
+library(caret)
+library(ggplot2)
+library(e1071)
+
+library(flexmix)
+```
+
+## Classification
+
+https://insightimi.wordpress.com/2020/03/08/classification-and-regression-tree/
+
+* Data Set (requires free login) https://www.kaggle.com/sriharipramod/bank-loan-classification/data
+
+
+```{r}
+ 
+bankDf<-read.csv("https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/data/UniversalBank.csv", header= T)
+View(bankDf)
+summary(bankDf)
+```
+
+```{r partition data}
+bankDf <- bankDf[ , -c(1, 5)] ## Drop ID and Zip
+ 
+set.seed(1)  
+trainIndex <- sample(1:nrow(bankDf), nrow(bankDf)*0.6)  
+trainData <- bankDf[trainIndex, ]
+testData <- bankDf[-trainIndex, ]
+```
+ 
+```{r fit tree}
+defaultTree <- rpart(Personal.Loan ~ ., data = trainData, method = "class")
+defaultTree
+```
+
+```{r plottree}
+prp(defaultTree, type = 1, extra = 1, under = TRUE, split.font = 1, varlen = -10)
+```
+
+```{r moreReport}
+rattle::fancyRpartPlot(defaultTree)
+```
+
+```{r prediction}
+head(predict(defaultTree,testData))
+``` 
+
+```{r ConfusionMatrix}
+predictionModelTrain <- predict(defaultTree,trainData,type = "class")
+confusionMatrix(predictionModelTrain, as.factor(trainData$Personal.Loan))
+```
+
+```{r ConfusionMatrixTest}
+predictionModelTest <- predict(defaultTree, testData, type = "class")
+ 
+confusionMatrix(predictionModelTest, as.factor(testData$Personal.Loan))
+```
+
+
+```{r complex}
+complexDefaultTree <- rpart(Personal.Loan ~ ., data = trainData, method = "class", cp = 0, minsplit = 1)
+ 
+length(complexDefaultTree$frame$var[complexDefaultTree$frame$var == "<leaf>"])
+```
+
+```{r drawComplexTree} 
+prp(complexDefaultTree, type = 1, extra = 1, under = TRUE, split.font = 1, varlen = -10, box.col=ifelse(complexDefaultTree$frame$var == "<leaf>", 'gray', 'white'))
+
+printcp(complexDefaultTree)
+plotcp(complexDefaultTree)
+```
+
+Data don't get better with cp < .021
+
+```{r pruning}
+prunedComplexDefaultTree <- prune(complexDefaultTree,cp = 0.021)
+length(prunedComplexDefaultTree$frame$var[prunedComplexDefaultTree$frame$var == "<leaf>"])
+prp(prunedComplexDefaultTree, type = 1, extra = 1, split.font = 1, varlen = -10)  
+```
+
+```{r fancyplotPruned}
+rattle::fancyRpartPlot(prunedComplexDefaultTree)
+```
+
+
+```{r ConfusionNew}
+predictionModelTestNew <- predict(prunedComplexDefaultTree,testData ,type = "class")
+confusionMatrix(predictionModelTestNew, as.factor(testData$Personal.Loan))
+```
+
+## Regression
+
+https://insightimi.wordpress.com/2020/03/15/cart-regression-tree-from-scratch-with-a-hands-on-examplein-r/
+
+* Data Set (requires free login)
+https://www.kaggle.com/hashroot97/carpriceprediction/version/1
+
+
+
+```{r}
+#importing the dataset
+carprices<- read.csv("https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/data/CarPricePrediction.csv", header= T)
+#partitioning the data
+set.seed(123)
+split = sample.split(carprices$quality, SplitRatio = 4/5)
+training_set = subset(carprices, split == TRUE)
+test_set = subset(carprices, split == FALSE)
+training_set
+test_set
+#Fitting Regression Model
+library(rpart)
+library(rpart.plot)
+regressor = rpart(formula = quality ~ .,
+                  data = training_set)
+summary(regressor)
+prp(regressor, type = 1, extra = 1, under = TRUE, split.font = 1, varlen = -10)
+predict(regressor, test_set)
+regressor = rpart(formula = quality ~ .,
+                  data = test_set)
+printcp(regressor)
+plotcp(regressor)
+Final_pruned_Tree = prune(regressor,cp = 0.019125)
+length(Final_pruned_Tree$frame$var[Final_pruned_Tree$frame$var == "<leaf>"])
+prp(Final_pruned_Tree, type = 1, extra = 1, split.font = 1, varlen = -10)
+New_predict = predict(Final_pruned_Tree, test_set)
+```
+
+## Mixture Models
+

@@ -1,0 +1,76 @@
+---
+title: "Toulmin Diagram"
+author: "Russell Almond"
+date: "8/26/2021"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(DiagrammeR)
+```
+
+The Toulmin diagram was design by legal scholar Stephen Toulmin to describe an argument.  
+## Inputs and Outputs
+
+
+
+```{r diagram, echo=FALSE}
+inputPanel(
+  textAreaInput('claim',"Claim:",placeholder="Proposition to establish\n Should pass clairity test."),
+  textAreaInput('data',"Data:",placeholder="Observation to support/refute claim."),
+  textAreaInput('warrant',"Warrant:",placeholder="Reasons which data is related to claim."),
+  textAreaInput('back',"Backing:",placeholder="Reasons for believing warrant."),
+  textAreaInput('alt',"Alternative:",placeholder="Reasons claim might not correspond to data."),
+  textAreaInput('rebut',"Rebuttal:",placeholder="Reasons for believing alternative.")
+)
+
+toulmin <- function (claim, data, warrant, alt, back="", rebut="") {
+  paste(
+    'igraph Toulmin {',
+    'rankdir="BT";',
+    'node [shape="rectangle"];',
+    paste('claim [label="Claim:',claim,'"]'),
+    paste('warrant [label="Warrant:',warrant,'"]'),
+    paste('alt [label="Alternative:',alt,'"]'),
+    paste('back [label="Backing:',back,'"]'),
+    paste('rebut [label="Rebuttal:',rebut,'"]'),
+    paste('data [label="Data:',data,'"]'),
+    'junction1, junction2 [fixedsize="true", height=0, width=0, style="invis"]',
+    'spacer1, spacer2, spacer3, spacer4 [fixedsize="true", height=0, width=0, style="invis"]',
+    '{rank="max"; spacer1, claim, spacer2}',
+    'spacer1 -> claim -> spacer2 [style="invis"]',
+    '{rank="same"; warrant, junction1, alt}',
+    'spacer1->warrant, spacer2 -> alt [style="invis"]',
+    '{rank="same"; back, junction2, rebut}',
+    'back -> junction2 -> rebut [style="invis"]',
+    '{rank="min"; spacer3, data, spacer4}',
+    'spacer3 -> data -> spacer4 [style="invis"]',
+    'back->spacer3, rebut -> spacer4 [style="invis"]',
+    'data -> junction2 -> junction1 [dir="none"]',
+    'junction1 ->  claim [label="so"]',
+    'subgraph cluser_1 {',
+        'warrant -> junction1 [label="since"]',
+        'junction1 -> alt [dir="back", label="unless"]',
+    '}',
+    'back -> warrant [label="supports"]',
+    'rebut -> alt [label="supports"]',
+    '}', sep='\n')
+}
+DiagrammeR::DiagrammeROutput(outputId = "diagram", width = "950px", height = "auto")
+
+output$diagram <- 
+  DiagrammeR::renderDiagrammeR({
+    DiagrammeR::grViz(
+        paste0(toulmin(input$claim,input$data,input$warrant,input$alt,
+                              input$back, input$rebut)))
+})
+
+textOutput("code")
+output$code <- renderPrint(toulmin(input$claim,input$data,input$warrant,input$alt,
+                              input$back, input$rebut))
+```
+
+
+

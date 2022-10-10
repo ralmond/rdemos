@@ -1,0 +1,130 @@
+---
+title: "PF 10 Analysis"
+output: html_notebook
+---
+
+
+```{r}
+library(eRm)
+```
+Next load the data
+```{r load}
+source("pf10examples.R")
+```
+
+## Dichotomous Scale
+
+```{r pf10di.items}
+pf10dich.items
+```
+
+
+```{r pf10di}
+pf10dich.students
+```
+
+## Start Rasch model analysis
+
+```{r Rasch}
+## data in pf10examples.R
+pf10.rm <- RM(pf10dich.students)
+pf10.rm
+```
+
+Look at Item parameters
+```{r item.par}
+## This provides informationa about items
+coef(pf10.rm)
+```
+## Build raw score to total score conversion.
+
+
+This provides information about raw score to scale 
+score conversion
+```{r scale}
+person.parameter(pf10.rm)
+plot(person.parameter(pf10.rm))
+```
+
+## Wright Map or Person/Item map
+```{r wright}
+plotPImap(pf10.rm)
+```
+
+
+## plot ICC curves for items
+```{r ICC}
+plotICC(pf10.rm,ask=FALSE)
+```
+## Look at test information
+```{r test info}
+plotINFO(pf10.rm)
+```
+
+
+# Polytomous data
+* PCM -- partial credit model -- each item has same scale
+* RSM -- rating scale model -- all items use common (Likert) scale
+
+## Fit the model
+```{r rsm}
+## Note for trichotomous data, first column is gender.
+pf10.rsm <- RSM(pf10trich.students[,-1]) ## Leave out first column
+summary(pf10.rsm)
+```
+
+## Look at ICC curves
+```{r ICC2}
+plotICC(pf10.rsm,ask=FALSE)
+```
+
+
+
+## Look at Wright Map
+```{r wright3}
+plotPImap(pf10.rsm)
+```
+
+## Conversion table
+```{r table.rsm}
+person.parameter(pf10.rsm)
+plot(person.parameter(pf10.rsm))
+```
+
+## Look at test information
+```{r rsm.info}
+plotINFO(pf10.rsm)
+```
+# Partial Credit Model
+* PCM -- partial credit model -- each item has same scale
+
+
+## Fit the model
+```{r pcm}
+## Note for trichotomous data, first column is gender.
+pf10.pcm <- PCM(pf10trich.students[,-1]) ## Leave out first column
+summary(pf10.pcm)
+```
+
+## Look at ICC curves
+```{r ICC2 pcm}
+plotICC(pf10.pcm,ask=FALSE)
+```
+
+
+
+## Look at Wright Map
+```{r wright3 pcm}
+plotPImap(pf10.pcm)
+```
+
+## Conversion table
+```{r table.pcm}
+person.parameter(pf10.pcm)
+plot(person.parameter(pf10.pcm))
+```
+
+## Look at test information
+```{r pcm.info}
+plotINFO(pf10.pcm)
+```

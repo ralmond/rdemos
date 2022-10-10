@@ -1,0 +1,46 @@
+---
+title: "Influence"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+ggplot(cars,aes(speed,dist)) + geom_point() + geom_smooth()
+```
+
+```{r}
+cars.fit <- lm(dist~speed,data=cars)
+cars.fit
+```
+```{r}
+plot(cars.fit)
+```
+
+```{r}
+influence(cars.fit)
+```
+$$ b_i = \frac{x_i - \bar x}{Var(x)}$$
+
+```{r}
+bi <- (cars$speed-mean(cars$speed))/var(cars$speed)
+plot(bi,influence(cars.fit)$hat)
+```
+```{r}
+plot(bi,influence(cars.fit)$coef[,2]) 
+```
+```{r}
+ggplot(cars,aes(speed,dist)) + geom_point() + geom_smooth()
+```
+```{r}
+ggplot(cars,aes(speed,dist)) + geom_jitter() + geom_smooth()
+```
+```{r}
+library(rstanarm)
+```
+```{r}
+ggplot(mtcars,aes(vs,mpg)) + geom_jitter(height=0,width=.05) + geom_smooth(method="lm")
+```
+

@@ -1,0 +1,333 @@
+---
+title: "Lab Part 1 using R"
+author: "Russell Almond"
+date: "5/18/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Installing R, RStudio and R packages
+
+This script can be found at
+
+[Compiled verison with output](https://pluto.coe.fsu.edu/rdemos/Lab1DataEntryinR.Rmd
+
+[Rmd Input version](https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/Lab1DataEntryinR.Rmd)
+
+## Getting R and R Studio
+
+Two separate pieces of software that work well together.
+
+* _R_ is the calculation engine.  You download and install R from https://cloud.r-project.org/)
+
+* _RStudio_ is the integrated development environment (IDE) which provides support for writing R scripts and generating data.  You download and install RStudio from https://rstudio.com/).
+
+If you use a package manager (e.g., `apt`, `yum`, `brew`) you can also install R from there.
+
+Generally, you will start R by Starting R Studio, which will start and run R.
+
+If you want to cite that you used R in analyzing your data, you can use the `citation()` command to see how to do that.
+
+```{r citation}
+citation()
+```
+To find out which version of RStudio you are running, select `Help > About RStudio`.
+
+
+## Adding packages
+
+The base _R_ code comes with around 2,000 functions for analyzing data.  
+
+Users can write their own functions which extend _R_.
+
+Advanced users can bundle the functions into packages and then share them as packages often on the CRAN website (https://www.r-project.org).  As of 2022-05-18, there were over 18,000 packages in CRAN.
+
+The hard part is knowing which one is good.  Once you get an idea of a package you want to try, it is straightforward to install it.  You can use the R function `install.packages()` (or the RStudio menu item `Tools > Install Packages`) to install the package.
+
+The package `tidyverse` is a well-regarded set of R packages (installing tidyverse will install a bunch of other related packages, the _dependencies_.)  Here is the command to install tidyverse.
+
+```{r eval=FALSE}
+install.pacakges("tidyverse")
+```
+
+(Note that sometimes `install.packages` will ask you to select a mirror, that is a server close to you from which to download the data.  You can select any server, but if you live in the US, you probably want to select one in North America.)
+
+Package installation is a two step process.  In step one, you download the package from CRAN to your local computer.  This is the `install.packages()`.  Normally, you don't need to repeat this (you may need to on the LRC computers as they get refreshed each time).  This downloads the package and sets it up on your local computer (either in the system R package library, or in a local library in your home directory.)
+
+To actually use the package, you need to load it into your R session.  This usually means putting a command like:
+
+```{r library}
+library(tidyverse)
+```
+
+At the top of your script.  If you are following along at home, press the triangle next to the code block, that will load the tidyverse packages into the current command.
+
+## The R Studio Layout
+
+A typical RStudio layout is divided into 4 regions (which can be resized).
+
+![RStudio Layout](https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/RStudioLayout.png)
+
+1. Region 1 is the script editor.  This is where you will do the most work.  See the next section for more details.  
+2. Region 2 is the R console, this shows the interaction between RStudio and R.  When you type in this window (and hit return) the command is sent to R, which will calculate it and print the result.  You can also run from the script by selecting the commands in the script and hitting the `-> Run` button.
+
+3. Region 3 has various lists.  _Environment_ gives a list of the data objects in your workspace, _Files_ gives you a list of files in the working directory (which can be opend in RStudio by double clicking), _Packages_ shows the packages that have been installed and which have been loaded.
+
+4. Region 4 is where (a) the help output appears and (b) the output of plotting commands appears.  
+
+Note that you can get help on any function in R, by either, searching for it on the help tab, or typing `?` followed by the function name in the console.  Googling, for example, "making boxplots using R" will often give you snippets of code that do what you are trying to do.
+
+## Making Scripts and Rmarkdown
+
+````
+```{r tagname}
+summary(iris)
+```
+````
+
+
+
+
+
+# A brief introduction to R
+
+[R for Data Sciences](https://r4ds.had.co.nz/)
+
+```{r}
+2+2
+pi
+```
+
+```{r}
+MikeysNumber <- 12
+MikeysNumber
+```
+
+
+## Vectors, matrixes, arrays and lists
+
+```{r}
+nums <- c(1:3,5)
+nums
+lets <- c("a","b","c")
+```
+
+```{r}
+lets[2]
+nums+1
+```
+
+```{r}
+mat <- matrix(1:12,3,4)
+mat
+mat[2,3]
+```
+
+
+```{r list}
+mylist <- list(number=1,name="fred")
+mylist
+mylist[[1]]
+mylist$name
+```
+
+## Functions
+
+```{r funs}
+increment <- function (x, by=1) {
+  x+by
+}
+increment(MikeysNumber)
+```
+
+```{r nest}
+increment(sqrt(4),2)
+```
+
+```{r genericFunctions}
+methods(summary)
+```
+## Pipes
+
+```{r piping}
+sqrt(4) |> increment(by=3)
+```
+
+```{r assigning}
+sqrt(4) |> increment(by=3) -> foo
+foo
+```
+
+## Data Frames and Tibbles
+
+```{r headTails}
+head(iris)
+tail(iris)
+```
+
+```{r summary}
+summary(iris)
+```
+
+```{r selectRows}
+iris |> filter(Species=="virginica") |> head()
+```
+
+```{r selectCols}
+iris |> select(starts_with("Petal"),Species) |> head() 
+```
+
+```{r ExtractColumn}
+iris |> pull(Petal.Length) -> Petal.Length
+mean(Petal.Length)
+```
+
+# Loading data into R 
+
+
+## read_csv
+
+```{r load_csv, eval=FALSE}
+ACED <- read_csv("ACED5400-Subset.csv")
+```
+
+```{r load_http}
+ACED <- read_csv("https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/ACED5400-2.csv")
+```
+
+
+## Working Directories
+
+```{r workingDirectory, eval=FALSE}
+getwd()
+## Windows
+# setwd("C:\\Users\\ralmond\\Projects")
+# setwd("C:/Users/ralmond/Projects")
+## Mac/Linux
+# setwd("/Users/ralmond/Projects")
+setwd(file.choose())  #Invokes file picker
+```
+
+## Summarys
+
+
+```{r summaryACED}
+summary(ACED)
+```
+
+[Code book](https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/ACED5400-Codebook.pdf)
+
+
+## Options when reading in data
+
+```{r help}
+help(read_csv)
+```
+
+## Marking Missing Values
+
+```{r loadMissing}
+ACED <- read_csv("https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/ACED5400-2.csv",na="-999")
+summary(ACED)
+```
+## Factors
+
+```{r strings}
+x1 <- c("Dec", "Apr", "Jan", "Mar")
+sort(x1)
+```
+```{r factor}
+month_levels <- c(
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+)
+y1 <- factor(x1, levels = month_levels)
+y2 <- factor(c(1,4,9,12), levels=1:12, labels=month_levels)
+y1
+y2
+sort(y1)
+```
+
+```{r unordered}
+y1 == y2
+y1 < y2
+```
+```{r ordered}
+month_levels <- c(
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+)
+y1 <- ordered(x1, levels = month_levels)
+y2 <- ordered(c(1,4,9,12), levels=1:12, labels=month_levels)
+y1
+y2
+y1 < y2
+```
+
+## Mutating Columns
+
+```{r cond_code}
+ACED |> 
+  mutate(Cond_code = 
+           factor(Cond_code, levels=1:4,
+                  labels=c("Adaptive, Accuracy Only",
+                          "Adaptive, Full Feedback",
+                          "Linear, Full Feedback",
+                          "Control"))) |>
+  mutate(Level_Code = 
+           factor(Level_Code, levels=1:6,
+                  labels = c("Honors", "Academic",
+                             "Regular", "Special Ed (Part 1)",
+                             "Special Ed (Part 2)",
+                             "English Language Learners"))) ->
+  ACED
+summary(ACED)
+```
+
+## Saving Labels
+
+```{r names}
+ACED_names <- list(SID = "Student ID",
+                   Cond_code = "Study Condition",
+                   Level_code = "Academic Track",
+                   pre_scaled = "Scaled pretest",
+                   post_scaled = "Scaled posttest",
+                   BNscore = "Internal ACED score")
+ACED_names$BNscore
+```
+
+
+## Making Tables
+
+```{r summarize}
+library(psych)
+knitr::kable(describe(ACED, fast=TRUE))
+```
+```{r summarizeDigits}
+library(psych)
+knitr::kable(describe(ACED),digits=2)
+```
+
+# Saving and Exporting the Workspace
+
+
+## Saving to .RData
+
+```{r save, eval=FALSE}
+save(list(ACED,ACED_names),"ACED.RData")
+load("ACED.RData")
+```
+
+## Saving to CSV
+
+```{r wirte_csv}
+write_csv(ACED,"ACED.csv")
+```
+
+
+## Knitting to PDF or Word
+
+

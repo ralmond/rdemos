@@ -1,0 +1,210 @@
+// ~->[DNET-1]->~
+
+// File created by an unlicensed user using Netica 6.07 on 04/04/2022 at 08:21:28 PM UTC.
+
+bnet Fred {
+autoupdate = TRUE;
+
+visual V1 {
+	defdispform = BELIEFBARS;
+	nodelabeling = TITLE;
+	NodeMaxNumEntries = 50;
+	nodefont = font {shape= "Arial"; size= 10;};
+	linkfont = font {shape= "Arial"; size= 9;};
+	ShowLinkStrengths = 1;
+	windowposn = (2, 38, 1057, 897);
+	resolution = 72;
+	drawingbounds = (1895, 929);
+	showpagebreaks = FALSE;
+	usegrid = TRUE;
+	gridspace = (6, 6);
+	NodeSet Node {BuiltIn = 1; Color = 0x00e1e1e1;};
+	NodeSet Nature {BuiltIn = 1; Color = 0x00f8eed2;};
+	NodeSet Deterministic {BuiltIn = 1; Color = 0x00d3caa6;};
+	NodeSet Finding {BuiltIn = 1; Color = 0x00c8c8c8;};
+	NodeSet Constant {BuiltIn = 1; Color = 0x00ffffff;};
+	NodeSet ConstantValue {BuiltIn = 1; Color = 0x00ffffb4;};
+	NodeSet Utility {BuiltIn = 1; Color = 0x00ffbdbd;};
+	NodeSet Decision {BuiltIn = 1; Color = 0x00dee8ff;};
+	NodeSet Documentation {BuiltIn = 1; Color = 0x00f0fafa;};
+	NodeSet Title {BuiltIn = 1; Color = 0x00ffffff;};
+	NodeSet Proficiencies {Disabled = 1; Color = 0x00c8c8c8;};
+	NodeSet pnodes {Disabled = 1; Color = 0x00c8c8c8;};
+	NodeSet HighLevel {Disabled = 1; Color = 0x00c8c8c8;};
+	PrinterSetting A {
+		margins = (1270, 1270, 1270, 1270);
+		};
+	};
+user U1 {
+	priorWeight = "10";
+	};
+
+node SolveGeometricProblems {
+	discrete = TRUE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	kind = NATURE;
+	chance = CHANCE;
+	parents = ();
+	probs = 
+		// High         Medium       Low          
+		  (0.04991533,  0.1159301,   0.8341545);
+	EqnDirty = TRUE;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"normalLink\"";
+		linkScale = "1";
+		lnAlphas = "1";
+		betas = "0";
+		};
+	visual V1 {
+		center = (564, 54);
+		height = 1;
+		};
+	};
+
+node CommonRatio {
+	discrete = TRUE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	kind = NATURE;
+	chance = CHANCE;
+	parents = (SolveGeometricProblems);
+	probs = 
+		// High         Medium       Low           // SolveGeometricProblems 
+		  (1,           0,           0,            // High                   
+		   0.7534847,   0.2353517,   0.0111636,    // Medium                 
+		   0.1258826,   0.703054,    0.1710635);   // Low                    ;
+	EqnDirty = TRUE;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"normalLink\"";
+		linkScale = "1";
+		lnAlphas = "structure(0, .Names = \"SolveGeometricProblems\")";
+		betas = "0";
+		};
+	visual V1 {
+		center = (108, 174);
+		height = 6;
+		};
+	};
+
+node ExamplesGeometric {
+	discrete = TRUE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	kind = NATURE;
+	chance = CHANCE;
+	parents = (SolveGeometricProblems);
+	probs = 
+		// High         Medium       Low           // SolveGeometricProblems 
+		  (0.518,       0.351,       0.131,        // High                   
+		   0.122,       0.344,       0.534,        // Medium                 
+		   0.009,       0.089,       0.902);       // Low                    ;
+	numcases = 1;
+	EqnDirty = TRUE;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"normalLink\"";
+		linkScale = "1";
+		lnAlphas = "structure(0, .Names = \"SolveGeometricProblems\")";
+		betas = "0";
+		};
+	visual V1 {
+		center = (342, 174);
+		height = 5;
+		};
+	};
+
+node ExtendGeometric {
+	discrete = TRUE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	kind = NATURE;
+	chance = CHANCE;
+	parents = (SolveGeometricProblems);
+	probs = 
+		// High         Medium       Low           // SolveGeometricProblems 
+		  (1,           0,           0,            // High                   
+		   0.963,       0.036,       0.001,        // Medium                 
+		   0.567,       0.379,       0.054);       // Low                    ;
+	EqnDirty = TRUE;
+	whenchanged = 1492104378;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"normalLink\"";
+		linkScale = "1";
+		lnAlphas = "structure(0, .Names = \"SolveGeometricProblems\")";
+		betas = "0";
+		};
+	visual V1 {
+		center = (588, 174);
+		height = 4;
+		};
+	};
+
+node ModelGeometric {
+	discrete = TRUE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	kind = NATURE;
+	chance = CHANCE;
+	parents = (SolveGeometricProblems);
+	probs = 
+		// High         Medium       Low           // SolveGeometricProblems 
+		  (0.281,       0.41,        0.309,        // High                   
+		   0.037,       0.201,       0.762,        // Medium                 
+		   0.001,       0.026,       0.973);       // Low                    ;
+	numcases = 1;
+	EqnDirty = TRUE;
+	whenchanged = 1492104408;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"normalLink\"";
+		linkScale = "1";
+		lnAlphas = "structure(0, .Names = \"SolveGeometricProblems\")";
+		betas = "0";
+		};
+	visual V1 {
+		center = (1134, 162);
+		height = 2;
+		};
+	};
+
+node TableGeometric {
+	discrete = TRUE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	kind = NATURE;
+	chance = CHANCE;
+	parents = (SolveGeometricProblems);
+	probs = 
+		// High         Medium       Low           // SolveGeometricProblems 
+		  (0.713,       0.216,       0.071,        // High                   
+		   0.326,       0.348,       0.326,        // Medium                 
+		   0.071,       0.216,       0.713);       // Low                    ;
+	numcases = 1;
+	EqnDirty = TRUE;
+	whenchanged = 1492104417;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"normalLink\"";
+		linkScale = "1";
+		lnAlphas = "structure(0, .Names = \"SolveGeometricProblems\")";
+		betas = "0";
+		};
+	visual V1 {
+		center = (858, 168);
+		height = 3;
+		};
+	};
+NodeSet Proficiencies {Nodes = (SolveGeometricProblems, CommonRatio, ExamplesGeometric, ExtendGeometric, ModelGeometric, TableGeometric);};
+NodeSet pnodes {Nodes = (SolveGeometricProblems, CommonRatio, ExamplesGeometric, ExtendGeometric, ModelGeometric, TableGeometric);};
+NodeSet HighLevel {Nodes = (SolveGeometricProblems);};
+};

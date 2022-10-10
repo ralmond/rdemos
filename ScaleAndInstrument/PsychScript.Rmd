@@ -1,0 +1,88 @@
+---
+title: "Psych Script"
+output: html_notebook
+---
+
+## Installing the package
+
+```{r eval=FALSE}
+install.packages(c("psych","GPArotation","mnormt"))
+```
+```{r eval=FALSE}
+library(psych)
+```
+
+## Descriptive Statistics
+
+Marginal Description
+
+```{r describe}
+data(sat.act)
+describe(sat.act)
+```
+
+Broken down by demographic groups
+
+```{r describeby}
+
+describeBy(sat.act,sat.act$gender,skew=FALSE,range=FALSE)
+```
+
+## Detecting Outliers
+
+```{r outliers}
+d2 <- outlier(sat.act)
+tail(sort(d2))
+sat.d2 <- data.frame(sat.act,d2)
+```
+## Scatterplot matrixes
+
+```{r scatmat}
+pairs.panels(sat.d2,bg=c("yellow","blue")[(d2 > 25)+1],pch=21)
+```
+
+## Violin (density) plot
+
+```{r violin}
+violin(sat.act[,4:6])
+violinBy(sat.act,var=5:6,grp="gender",grp.name=c("M","F"))
+```
+
+
+## Coefficient Alpha
+
+```{r attitude data}
+attitude
+```
+
+```{r alpha}
+alpha(attitude)
+```
+
+The `keys` argument can be used to reverse code some items.
+
+```{r alpha}
+alpha(attitude,keys=c("complaints","critical"))
+```
+
+## Coefficient Omega
+
+Simulate some data:
+```{r sim.hier}
+r9 <- sim.hierarchical(n=500,raw=TRUE)$observed
+as_tibble(round(r9,2))
+```
+Calculate alpha:
+```{r sim.alpha}
+alpha(r9)
+```
+
+Calculate Omega:
+```{r sim.omega}
+om.9 <- omega(r9)
+om.9
+```
+
+```{r omega attributes}
+omega(attitude)
+```

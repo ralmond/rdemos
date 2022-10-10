@@ -1,0 +1,2 @@
+#!/bin/bash
+R  --slave </home/ralmond/Projects/rgroup-shiny/Proc4/Trivial.R 

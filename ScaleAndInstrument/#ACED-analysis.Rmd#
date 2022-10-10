@@ -1,0 +1,24 @@
+---
+title: "ACED Analysis"
+author: "Russell Almond"
+date: "10/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(psych)
+library(arm)
+```
+
+## Downloading the data
+
+```{r data}
+source("https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ScaleAndInstrument/ACEDdat.R")
+```
+
+```{r eRm additions}
+source("https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ScaleAndInstrument/eRmAdditions.R")
+```
+

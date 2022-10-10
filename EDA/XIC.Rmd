@@ -1,0 +1,73 @@
+---
+title: "XIC"
+author: "Russell Almond"
+date: "10/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Deviance
+
+$p(Y|\theta)$ -- probability of observing the data given the parameters of the model
+
+_Deviance_ a measure of model fit.
+
+$$ -2*\sum_{i=1}^{N} \log P({\bf y}_i|\theta)$$
+* With normal models, the deviance is more or less the sum of squared residuals, so minimal deviance is least squares.
+
+* Minimum deviance is maximum likelihood.
+
+* Really useful when we move from `lm` to `glm`.
+
+## AIC -- Akaike Information Critereon
+
+* Deviance always goes down when we add a parameter.
+
+* So add penalty for more parameters.
+
+$$AIC = 2k - 2*\sum_{i=1}^{N} \log P({\bf y}_i|\theta)$$
+Where $k$ is the number of parameters.
+
+## BIC -- Bayesian (Schwarz) Information Criteria
+
+$$BIC = k \log N - 2*\sum_{i=1}^{N} \log P({\bf y}_i|\theta)$$
+
+
+Equivalent to minimum description length
+
+## DIC -- Deviance Information Criteria
+
+$$ DIC = - 2*\sum_{i=1}^{N} \log P({\bf y}_i|\theta) + 2p_{DIC}$$
+
+
+$$ p_{DIC} = 2(\log P(Y|\tilde\theta) - E_{post}[\log P(Y|\theta)]) $$
+
+$p_DIC$ = Average Deviance - Deviance at average
+
+## WAIC -- Watanabe Akaike Information Criterion
+
+Similar to DIC, but uses different method to calculate effective dimenisons
+
+### Method 1
+
+$$p_{WAIC1} = 2 \sum_{i=1}^N (
+\log (E_{post}[p(y_i|\theta)]) - E_{post} [\log(p(y_i|\theta))]$$
+
+
+### Method 2
+$$p_{WAIC1} = 2 \sum_{i=1}^N  \text{var}_{post} [\log(p(y_i|\theta))]$$
+
+## LOO-CV
+
+Let $p_{post(-i)}$ be the posterior distribution leaving $y_i$ out of the sample.
+
+$$lppd_{LOO-CV} = \sum_{i=1}^N \log p_{post(-i)} (y_i|\theta)$$
+
+Bias correction
+$$ b= lppd - \overline{lppd}_{-i}$$
+
+$$ \overline{lppd}_{-i} = \sum_{i=1}^N\sum_{j=1}^n \log p_{post(-i)} (y_j|\theta)$$
+

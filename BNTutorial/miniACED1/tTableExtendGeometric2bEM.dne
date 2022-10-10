@@ -1,0 +1,108 @@
+// ~->[DNET-1]->~
+
+// File created by an unlicensed user using Netica 5.04 on 04/12/2022 at 17:59:43.
+
+bnet tTableExtendGeometric2bEM {
+autoupdate = FALSE;
+title = "tTableExtendGeometric2b";
+whenchanged = 1649800783;
+
+visual V22 {
+	defdispform = BELIEFBARS;
+	nodelabeling = TITLE;
+	NodeMaxNumEntries = 50;
+	nodefont = font {shape= "Arial"; size= 9;};
+	linkfont = font {shape= "Arial"; size= 9;};
+	resolution = 72;
+	drawingbounds = (1270, 720);
+	showpagebreaks = FALSE;
+	usegrid = TRUE;
+	gridspace = (6, 6);
+	NodeSet Node {BuiltIn = 1; Color = 0x00E1E1E1;};
+	NodeSet Nature {BuiltIn = 1; Color = 0x00F8EED2;};
+	NodeSet Deterministic {BuiltIn = 1; Color = 0x00D3CAA6;};
+	NodeSet Finding {BuiltIn = 1; Color = 0x00C8C8C8;};
+	NodeSet Constant {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet ConstantValue {BuiltIn = 1; Color = 0x00FFFFB4;};
+	NodeSet Utility {BuiltIn = 1; Color = 0x00FFBDBD;};
+	NodeSet Decision {BuiltIn = 1; Color = 0x00DEE8FF;};
+	NodeSet Documentation {BuiltIn = 1; Color = 0x00F0FAFA;};
+	NodeSet Title {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet onodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet pnodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet Observables {Disabled = 1; Color = 0x00C8C8C8;};
+	PrinterSetting A {
+		margins = (1270, 1270, 1270, 1270);
+		};
+	};
+user U1 {
+	Hub = "MiniACEDPM";
+	Pathname = "TableExtendMedEM.dne";
+	};
+
+param X_TableGeometric_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "TableGeometric";
+	whenchanged = 1649800731;
+	};
+
+param X_ExtendGeometric_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "ExtendGeometric";
+	whenchanged = 1649800731;
+	};
+
+node tTableExtendGeometric2b {
+	kind = NATURE;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (Yes, No);
+	levels = (1, 0);
+	inputs = (TableGeometric, ExtendGeometric);
+	parents = (X_TableGeometric_1, X_ExtendGeometric_1);
+	probs = 
+		// Yes          No            // TableGeometric ExtendGeometric 
+		  (0.9482061,   0.05179393,   // High           High            
+		   0.8512425,   0.1487575,    // High           Medium          
+		   0.6414033,   0.3585968,    // High           Low             
+		   0.7618628,   0.2381372,    // Medium         High            
+		   0.5,         0.5,          // Medium         Medium          
+		   0.2381372,   0.7618628,    // Medium         Low             
+		   0.3585968,   0.6414033,    // Low            High            
+		   0.1487575,   0.8512425,    // Low            Medium          
+		   0.05179393,  0.9482061);   // Low            Low             ;
+	numcases = 10;
+	whenchanged = 1649800783;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"partialCredit\"";
+		lnAlphas = "c(TableGeometric = 0.405465108108164, ExtendGeometric = 0)";
+		betas = "0";
+		Truename = "tTableExtendGeometric2b";
+		};
+	visual V22 {
+		center = (1134, 642);
+		height = 1;
+		link 1 {
+			labelposn = (1171, 582, 1257, 597);
+			path = ((1169, 582), (1155, 606));
+			};
+		link 2 {
+			labelposn = (1109, 582, 1202, 597);
+			path = ((1099, 582), (1113, 606));
+			};
+		};
+	};
+NodeSet onodes {Nodes = (tTableExtendGeometric2b);};
+NodeSet pnodes {Nodes = (tTableExtendGeometric2b);};
+NodeSet Observables {Nodes = (tTableExtendGeometric2b);};
+};

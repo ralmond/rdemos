@@ -1,0 +1,61 @@
+---
+title: "Packages"
+author: "Russell Almond"
+date: "February 1, 2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Packages
+
+Packages add new capabilities to R.
+
+Package contains:
+- DESCRIPTION -- Name, short description, version, dependencies
+- R code 
+- Man pages (help) for new code
+
+Package may also contain:
+- SRC:  C, Fortran, Java, ... code to add functionality or to link to other tools (e.g., a database)
+- Data:  Sample data to test functions
+- Vingettes:  Longer narrative help that describes how to do something.
+
+## Finding new R packages
+
+- CRAN: Comprehensive R Archive Network
+  + >13,000 packages:  https://cran.r-project.org/
+  + Mirrors around the world https://cloud.r-project.org/
+- GitHub:  Many package sources are maintained there.
+- Private Repositories
+- Search Stack Overflow and similiar sites.
+
+## Three Steps -- Download, Install and Load
+
+1. First, you must download the package code (either source or compiled to your computer)
+2. Then the package must be _installed_ in a library directory that R knows about.  
+  + The `install.packages(name)` function will do steps 1 and 2
+3. When you want to use functions from the package, you need to _load_ them into the workspace.  
+  + This can be done with `library(name)` or `require(name)`.
+
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Slide with R Output
+
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+

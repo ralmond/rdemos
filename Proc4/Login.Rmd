@@ -1,0 +1,80 @@
+---
+title: "Login Test"
+author: "Russell Almond"
+date: "June 3, 2020"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(EABN)
+library(PNetica)
+library(shiny)
+library(futile.logger)
+mess <- character()
+flog.appender(function (line) {
+  mess <<- c(mess,line)
+  output$log <- renderTable(data.frame(Messages=mess),
+                            colnames=FALSE)
+})
+flog.threshold(DEBUG)
+```
+
+## Login 
+
+This page is mostly just to test the login and logging mechanisms.
+
+```{r passwordChecker, echo=FALSE}
+
+checkPassword <- function (uid,passwd) {
+    pwdline <- system2("/bin/grep",
+                       c(sprintf("^%s:",uid),                                   "/usr/local/share/Proc4/p4pwds"),
+                       stdout=TRUE)
+    if (!is.null(attr(pwdline,"status")) || 
+        !is.character(pwdline) || length(pwdline) == 0L || 
+        nchar(pwdline)==0L) 
+      return (FALSE)
+    pwdbits <- strsplit(pwdline,"$",fixed=TRUE)[[1]]
+    method <- sprintf("-%s",pwdbits[2])
+    salt <- pwdbits[3]
+    pwd <- system2("/usr/bin/openssl",
+                     c("passwd",method, 
+                       "-salt",salt, input$adminpwd),
+                     stdout=TRUE)
+    target <- paste("$",paste(pwdbits[-1],collapse="$"),sep="")
+    return (pwd == target)
+}
+
+```
+
+
+```{r login, echo=FALSE}
+tags$head(tags$script(src = "message-handler.js"))
+inputPanel(
+  textInput("adminid", label = "Username:",
+              width = 500),
+  passwordInput("adminpwd", label = "Password:",
+              width = 500),
+  textInput("branch", label = "Vesion Branch:",
+            value="PP-main",width = 500),
+  actionButton("go","Go")
+)
+
+p(tableOutput("log"))
+observeEvent(input$go, {
+  showNotification(
+    ifelse(checkPassword(input$adminid,input$adminpwd),
+           sprintf("Logged into application %s.", input$branch),
+          "Authentication Error."))
+  flog.info("Message 1.")
+  flog.debug("Message 2.")
+  flog.info("Message 3.")
+  for (i in 4:25) {
+    Sys.sleep(5)
+    flog.info("Message %d",i)
+  }
+  })
+```
+
+

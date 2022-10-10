@@ -1,0 +1,32 @@
+---
+title: "Index of R Demonstrations for Peanut Package"
+author: "Russell Almond"
+date: "September 4, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(htmltools)
+```
+
+![Florida State University](https://one.fsu.edu/alumni/image/FSU-Seal-full-color-lo-res1.jpg)
+
+These are demonstrations for the Peanut Package for manipulating Bayesian networks.  More information about Peanut can be found at https://pluto.coe.fsu.edu/RNetica/Peanut.html, or at the github site:
+https://github.com/ralmond/Peanut
+
+
+## Index of R Demonstrations
+
+```{r index,echo=FALSE}
+alist <-  function(file) {tags$li(a(basename(file),href=file))}
+tag("ul",lapply(list.files(pattern="*.Rmd$"),alist))
+```
+![CC-BY](https://pluto.coe.fsu.edu/by.png)
+
+These are licensed under the creative commons CC BY license.  You many distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator.
+
+
+For more information contact [Russell Almond](mailto:ralmond@fsu.edu). 
+
+The Source files for these demonstrations can be found at https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/Peanut

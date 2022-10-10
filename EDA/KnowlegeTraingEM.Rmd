@@ -1,0 +1,158 @@
+---
+title: "Knowledge Tracing EM"
+author: "Russell Almond"
+date: "1/20/2022"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(DiagrammeR)
+
+## This is syntaxtic sugar, so I can use this idiom in a pipe.
+applyappend <- function(listOfData)
+  do.call(rbind,listOfData)
+
+
+```
+
+## Knowledge Tracing Model
+
+Corbett and Anderson (1995)
+
+Hidden Markov Model
+
+Markov means past is independent of future given present.
+
+Hidden means one variable is latent.
+
+```{r hmm-dot, fig.cap="Knowledge Tracing (Hidden Markov) model"}
+DiagrammeR::grViz("digraph hmm {
+
+graph[layout=dot]
+
+node[shape=circle]
+subgraph hidden {
+  rank=min;
+  L0; L1; L2; L3; L4; L5
+  L0 -> L1 -> L2 -> L3 -> L4 -> L5
+}
+
+X0; X1; X2; X3; X4; X5
+L0 -> X0; L1 -> X1; L2 -> X2; L3 -> X3; L4 -> X4; L5->X5;
+
+}")
+
+```
+
+
+$i$ represents opportunity to practice Knowledge, Skill or Ability (KSA)
+
+$L_i=1$ is mastery, $L_i=0$ is non-mastery at Time $i$
+
+$X_i$ is response at $i$th opportunity (1=success, 0=failure)
+
+[Knowledge Tracing App](https://catherinesyeh.github.io/bkt-balloon/)
+
+## Parameters of the Knowledge Tracing Model
+
+
+
+* Assumption 1:  No forgetting -- $L_{i+1} \ge L_i$
+
+* Assumption 2: Constant learning rate $P(L_{i+1}=1|L_i=0) = p(T)$, `learn`
+
+* Assumption 3: Constant item parameters
+
+ - `guess` $P(X_i=1|L_i=0)$
+ 
+ - `slip` $P(X_i=0|L_i=1)$
+ 
+ Need one more parameter, $P(L_0=1)$, `init`
+ 
+## Stopping Rule (Russell Addition)
+
+Original Corbett and Anderson paper assumed all students do same number of practices.
+
+This simulation is based on a tutoring system, where students can work on as many examples as they like.
+
+- `quit0` $P(quit|L_i=0)$
+
+- `quit1` $P(quit|L_i=1)$
+
+```{r generator}
+
+simkt <- function(id=0,init=.5,learn=.25,
+                  guess=.2,slip=.2,
+                  quit0=.1,quit1=.25) {
+  result <- numeric() # Result vector
+  mastery <- runif(1) < init
+  mvec <- numeric()
+  done <- FALSE
+  while (!done) {
+    mvec <- c(mastery,mvec)
+    result <- c(
+      runif(1) < ifelse(mastery,1-slip,guess),
+      result)
+    if (!mastery) mastery <- runif(1) < learn
+    done <- runif(1) < ifelse(mastery,quit1,quit0)
+  }
+  data.frame(id=id,
+             trial=1:length(result),
+             result=rev(result),
+             mastery=rev(mvec))
+}
+simkt(-1)
+```
+   
+## Now generate sample data
+
+Use `lapply` as this makes it easier to make things parallel;  load `parallel` package and use `mclappy` instead of `lapply`.
+
+Wrap call to `simkt` in an anonymous function to make changing the parameters easier.
+
+The `do.call(rbind,...)` trick glues the data together.
+
+```{r generate}
+N <- 100
+lapply(1:N,
+       function (id) {
+         simkt(id)
+       }) %>% applyappend -> simktdat
+```
+
+
+## Thinking about the EM algorithm
+
+If we knew $\bf L$, then fitting the parameters would be each.
+
+The sufficient statistic for the model is a bunch of crosstabs:  $L_i \times X_i$, $L_i \times L_{i-1}$, $L_1$.
+
+The expected value can be found by plugging in probabilities for $L_i$.
+
+E-Step:  Use forward-backward algorithm to estimate probabilities and calculate CPTs
+
+M-Step:  Solve CPTs.
+
+
+## Forward Backward Algorithm
+
+https://en.wikipedia.org/wiki/Forward%E2%80%93backward_algorithm
+
+$$\pi_0^{(r)} = \left ( \begin{array}{c}
+P(L_0) \\
+1-P(L_0)
+\end{array}
+\right )
+$$
+
+Transition Matrix
+
+$$ {\bf T} = 
+\left ( \begin{array}{cc}
+1.0 & 0.0 \\
+P(L_{t} | L_{t-1}) & 1- P(L_{t} | L_{t-1}) \\
+\end{array}\right )
+$$

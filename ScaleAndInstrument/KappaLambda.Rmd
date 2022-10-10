@@ -1,0 +1,40 @@
+---
+title: "Kappa, Lambda & Gamma Examples"
+author: "Russell Almond"
+date: "9/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Language Testing Example
+
+This is based on a made up language testing example by Bob Mislevey:
+
+![Language Model](ILanguage.png)
+
+### Reading
+
+```{r}
+Reading <- matrix(c(0.229,0.025,0.00,0.025,0.445,0.029,0,.040,0.207),3,3,byrow=TRUE)
+Reading
+```
+Load the vcd library for Kappa statistic
+```{r Load}
+library(vcd)
+gkLambda <- function (tab) {
+  pmax <- max(apply(tab,1,sum))
+  lambda <- (sum(diag(tab)) - pmax)/(sum(tab)-pmax)
+  return(lambda)
+}
+```
+```{r Kappa}
+Kappa(Reading)
+gkLambda(Reading)
+```
+
+```{r}
+agreementplot(Reading)
+```

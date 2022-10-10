@@ -1,0 +1,87 @@
+---
+title: "Logging Test"
+author: "Russell Almond"
+date: "June 3, 2020"
+output: html_document
+runtime: shiny
+---
+
+The logging function appends a line to the `mess` object each time it is called.  This is rendered in the log table output.
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+
+## Don't really need to check for this demo.
+checkPassword <- function (uid, pwd) TRUE
+```
+```{r}
+status <- reactiveVal("Ready.")
+nclicks <- reactiveVal(0)
+logstatus <- reactiveValues()
+logstatus$logfile <- character()
+logstatus$log <- data.frame(Messages="No log file yet.")
+logtimer <- reactiveTimer(1000)
+  readlog <- reactive({
+    logtimer()
+    if (status()=="Working..." &&
+        length(logstatus$logfile) >0L  &&
+        file.exists(logstatus$logfile)) {
+      cat("Checking log file:",logstatus$logfile,".\n")
+      if (!file.exists("/tmp/signal")) status("Done.")
+      lf <- file(logstatus$logfile)
+      mess <- readLines(lf)
+      close(lf)
+      cat("Found ",length(mess),"messages.\n")
+      logstatus$log <- data.frame(Messages=mess)
+    }
+  })
+  observeEvent(input$go, {
+    showNotification(
+        ifelse(checkPassword(input$adminid,input$adminpwd),
+               sprintf("Logged into application %s.", input$branch),
+               "Authentication Error."))
+    if (nclicks() > 0L) {
+      showNotification("Already running model builder.")
+      return (NULL)
+    }
+    logstatus$logfile <- "/tmp/Logging.log"
+    if (file.exists(logstatus$logfile)) unlink(logstatus$logfile)
+    status("Working...")
+
+    system2("/home/ralmond/Projects/rgroup-shiny/Proc4/Trivial",wait=FALSE)
+
+    return(NULL)
+  })
+
+output$status <- renderText(status())
+output$log <- renderTable({readlog();logstatus$log},colnames=FALSE)
+
+```
+
+
+
+## Login 
+
+Press Go to test the logging mechanism.
+
+```{r login, echo=FALSE}
+tags$head(tags$script(src = "message-handler.js"))
+inputPanel(
+  textInput("adminid", label = "Username:",
+              width = 500),
+  passwordInput("adminpwd", label = "Password:",
+              width = 500),
+  textInput("branch", label = "Vesion Branch:",
+            value="PP-main",width = 500),
+  actionButton("go","Go"),
+  actionButton("log","Show Log.")
+)
+```
+## Results
+```{r}
+p("Model Builder is ",textOutput("status"))
+p(tableOutput("log"))
+
+```
+
+

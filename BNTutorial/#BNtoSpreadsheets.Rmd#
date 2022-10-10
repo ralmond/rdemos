@@ -1,0 +1,577 @@
+---
+title: "Building Spreadsheets from Nets"
+author: "Russell Almond"
+date: "4/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Tabular Description of a Bayes nets.
+
+The `Peanut` system allows a system to be described with five spreadsheets:
+
+* `Nets` --- this is a manifest of all of the networks (proficiency (hub) and evidence (spoke) models)
+
+* `Nodes` --- this is a manifest of all the nodes
+
+* `Q` --- This is a spreadsheet describing the relationships between the proficiency (hub) and evidence spoke variables.
+
+* `Omega` --- This is a spreadsheet describing the relationships between the competency (hub) variables.
+
+* `Stastistics` --- This is a manifest of the statiscs to be used in reporting.
+
+This document shows how to start from a collection of existing Bayes nets and build up the spreadsheets.
+
+## The MiniACED model
+
+```{r preliminaries}
+library(PNetica)
+session <- RNetica::NeticaSession()
+startSession(session)
+inDir <- "miniACED"
+outDir <- "miniACED1"
+```
+
+First, find the proficiency model and the list of proficiency nodes.  Add the label \dQuote{proficiency} to each node.  Finally, force the network into a proficiency model, including giving it a default prior weight.
+
+```{r proficiency}
+miniACED.PM <- ReadNetworks(file.path(inDir, "MiniACEDPM.dne"),
+                            session=session)
+miniACED.prof <- NetworkAllNodes(miniACED.PM)
+NetworkNodesInSet(miniACED.PM,"Proficiencies") <- miniACED.prof
+
+## Force this into a P-net.
+miniACED.PM <- as.Pnet(miniACED.PM)
+PnetPriorWeight(miniACED.PM) <- 10      #Default weight
+```
+
+## Fix top level proficiency node
+
+The nodes only have the conditional probability tables, the Peanut parameters have been stripped out.  So we will need to recreate them.
+
+The top level node is easy as it has no parents.  Set this up a regression (Compenstaory rule, normal link) model with no predictors.
+
+```{r sgp}
+sgp <- miniACED.prof$SolveGeometricProblems
+PnodeStateValues(sgp) <- effectiveThetas(NodeNumStates(sgp))
+PnodeQ(sgp) <- TRUE
+PnodeRules(sgp) <- "Compensatory"
+PnodeLink(sgp) <- "normalLink"
+PnodeLinkScale(sgp) <- 1
+PnodeLnAlphas(sgp) <- 1
+PnodeBetas(sgp) <- 0
+```
+
+Diego Zapata and I built the original CPTs for ACED by eliciting parameters for the regression model from Aurora Graf (the Math expert on the project).  The original numbers are somewhere, but not particularly easy to grab.
+
+Fortunately, we can recover the parameters using the function `maxCPTParam`.  This is an iterative process.  The default runs for only 5 cycles, because it normally runs inside of another loop, so bump up the number of cycles to get a bit more accuracy (this is the second argument).
+
+```{r sgpTest}
+maxCPTParam(sgp,25)
+PnodeBetas(sgp)
+PnodeLinkScale(sgp)
+```
+
+## Now go through and do the other proficiency variables
+
+```{r CommonRatio}
+cr <- miniACED.prof$CommonRatio
+PnodeStateValues(cr) <- effectiveThetas(NodeNumStates(cr))
+PnodeQ(cr) <- TRUE
+PnodeRules(cr) <- "Compensatory"
+PnodeLink(cr) <- "normalLink"
+PnodeLinkScale(cr) <- 1
+PnodeLnAlphas(cr) <- c(SolveGeometricProblems=0)
+PnodeBetas(cr) <- 0
+
+maxCPTParam(cr,25)
+PnodeAlphas(cr)
+PnodeBetas(cr)
+PnodeLinkScale(cr)
+```
+
+
+```{r OtherProficiencies}
+exg <- miniACED.prof$ExamplesGeometric
+PnodeStateValues(exg) <- effectiveThetas(NodeNumStates(exg))
+PnodeQ(exg) <- TRUE
+PnodeRules(exg) <- "Compensatory"
+PnodeLink(exg) <- "normalLink"
+PnodeLinkScale(exg) <- 1
+PnodeLnAlphas(exg) <- c(SolveGeometricProblems=0)
+PnodeBetas(exg) <- 0
+maxCPTParam(exg,25)
+
+
+ext <- miniACED.prof$ExtendGeometric
+PnodeStateValues(ext) <- effectiveThetas(NodeNumStates(ext))
+PnodeQ(ext) <- TRUE
+PnodeRules(ext) <- "Compensatory"
+PnodeLink(ext) <- "normalLink"
+PnodeLinkScale(ext) <- 1
+PnodeLnAlphas(ext) <- c(SolveGeometricProblems=0)
+PnodeBetas(ext) <- 0
+maxCPTParam(ext,25)
+
+mdg <- miniACED.prof$ModelGeometric
+PnodeStateValues(mdg) <- effectiveThetas(NodeNumStates(mdg))
+PnodeQ(mdg) <- TRUE
+PnodeRules(mdg) <- "Compensatory"
+PnodeLink(mdg) <- "normalLink"
+PnodeLinkScale(mdg) <- 1
+PnodeLnAlphas(mdg) <- c(SolveGeometricProblems=0)
+PnodeBetas(mdg) <- 0
+maxCPTParam(mdg,25)
+
+tbg <- miniACED.prof$TableGeometric
+PnodeStateValues(tbg) <- effectiveThetas(NodeNumStates(tbg))
+PnodeQ(tbg) <- TRUE
+PnodeRules(tbg) <- "Compensatory"
+PnodeLink(tbg) <- "normalLink"
+PnodeLinkScale(tbg) <- 1
+PnodeLnAlphas(tbg) <- c(SolveGeometricProblems=0)
+PnodeBetas(tbg) <- 0
+maxCPTParam(tbg,25)
+```
+
+Finally, we need to mark all of the nodes as `Pnodes`.  Then, write
+the network back out.  The last can be done with just the
+`RNetica::WriteNetworks` function.
+
+
+```{r WriteProfModel}
+if (!dir.exists(outDir)) dir.create(outDir)
+PnetPnodes(miniACED.PM) <- miniACED.prof
+RNetica::WriteNetworks(miniACED.PM,file.path(outDir, "miniACEDPnet.dne"))
+```
+
+```{r QuiteRead, eval=FALSE}
+## This reads in the previous steps instead of redoing them
+miniACED.PM <- 
+  RNetica::ReadNetworks(file.path(outDir, "miniACEDPnet.dne"),
+                        session)
+miniACED.prof <- RNetica::NetworkAllNodes(miniACED.PM)
+sgp <- miniACED.prof$SolveGeometricProblems
+cr <- miniACED.prof$CommonRatio
+exg <- miniACED.prof$ExamplesGeometric
+ext <- miniACED.prof$ExtendGeometric
+mdg <- miniACED.prof$ModelGeometric
+tbg <- miniACED.prof$TableGeometric
+}
+```
+
+
+## Evidence Models
+
+Here we can exploit the task models used by the ACED design team.  Most tasks had Levels 1, 2 and 3 refer to easy,  medium and hard difficulty.  Also, many tasks had both a and b are variant at the same level of difficulty. 
+
+Next tasks and evidence models were named with the name of the proficiencies with the most important one first, so that will be easy as well.
+
+Finally, everything is a compensatory, so that makes it all straightforward.
+
+## Common Ratio Items -- tCommonRatioXx
+
+We have six items to make 1a, 1b, 2a, 2b, 3a, 3b
+
+We start by adding the observable(s) to the proficiency model and
+setting up the up the structure. 
+
+Note that all of the variants have the same discrimination parameters (1) so we can set this here.
+
+```{r CRItem}
+item <- NewDiscreteNode(miniACED.PM,"isCorrect")
+PnodeStateValues(item) <- c(1,0)
+PnodeParents(item) <- list(cr)
+PnodeQ(item) <- TRUE
+PnodeRules(item) <- "Compensatory"
+PnodeLink(item) <- "partialCredit"
+PnodeLnAlphas(item) <- c(CommonRatio=0)
+PnodeLabels(item) <- c("Observables","pnodes","onodes")
+RNetica::NodeVisPos(item) <-
+  RNetica::NodeVisPos(cr)+c(0,100) #In column with CR
+```
+
+Setting the node visual position (the last line above) is necessary
+because of a bug in the 5.04 version of Netica which has to do with
+mixing nodes with and without visual positions.  As all of the PM
+nodes have them, we need to add them in the EM too. 
+
+
+### Make the Easy Variant EM
+
+Everything else is set, we just need to set the demand (beta) value to
+-1 for the easy variant and build the table. 
+
+
+```{r EasyCR}
+PnodeBetas(item) <- -1
+BuildTable(item)
+```
+
+This next step exploits some features of Netica, so it might not work
+in another implementation.  Basically, when we copy the node into a
+new network, Netica creates \dQuote{stub} nodes (references) to the
+parent variables.  These can be used to reconnect the network using
+the `PnetAdjoin` function (which calls `RNetica::AdjoinNetwork`). 
+
+```{r WriteEasyEM}
+CommonRatioEasyEM <- 
+  RNetica::CreateNetwork("CommonRatioEasyEM", session)
+RNetica::CopyNodes(list(item),newnet=CommonRatioEasyEM)
+RNetica::WriteNetworks(CommonRatioEasyEM,file.path(outDir, "CommonRatioEasyEM.dne"))
+```
+
+### Medium
+
+This is basically the same, we just need to set the new demand (beta)
+value, rebuild the table and create the new spoke network.  To make
+the final model look better, we tweak the visual position. 
+
+```{r MediumCR}
+PnodeBetas(item) <- 0
+BuildTable(item)
+NodeVisPos(item) <- NodeVisPos(cr)+c(0,300) #In column with CR
+CommonRatioMedEM <- 
+  RNetica::CreateNetwork("CommonRatioMedEM", session)
+RNetica::CopyNodes(list(item),newnet=CommonRatioMedEM)
+RNetica::WriteNetworks(CommonRatioMedEM,
+                       file.path(outDir, "CommonRatioMedEM.dne"))
+```
+
+### Hard
+
+
+Same thing; new difficulty is 1.
+
+```{r HardCR}
+PnodeBetas(item) <- 1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(cr)+c(0,500) #In column with CR
+CommonRatioHardEM <-
+  RNetica::CreateNetwork("CommonRatioHardEM",
+                         session)
+RNetica::CopyNodes(list(item),newnet=CommonRatioHardEM)
+RNetica::WriteNetworks(CommonRatioHardEM,
+                       file.path(outDir, "CommonRatioHardEM.dne"))
+```
+
+
+## Examples -- tExamplesGeometricXx
+
+We can reuse a lot of what we did before.  We just basically need to
+change the parents of the item. 
+
+```{r ExamplesBase}
+PnodeParents(item) <- list(exg)
+PnodeLnAlphas(item) <- c(ExamplesGeometric=0)
+```
+
+### Make the Easy Variant EM
+
+```{r ExamplesEasy}
+PnodeBetas(item) <- -1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(exg)+c(0,100) #In column with EXG
+ExamplesEasyEM <- 
+  RNetica::CreateNetwork("ExamplesEasyEM", session)
+RNetica::CopyNodes(list(item),newnet=ExamplesEasyEM)
+RNetica::WriteNetworks(ExamplesEasyEM,
+                       file.path(outDir, "ExamplesEasyEM.dne"))
+```
+
+### Medium
+```{r ExamplesMedium}
+PnodeBetas(item) <- 0
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(exg)+c(0,300) #In column with EXG 
+ExamplesMedEM <- RNetica::CreateNetwork("ExamplesMedEM", session)
+RNetica::CopyNodes(list(item),newnet=ExamplesMedEM)
+RNetica::WriteNetworks(ExamplesMedEM, file.path(outDir, "ExamplesMedEM.dne"))
+```
+
+### Hard
+```{r ExamplesHard}
+PnodeBetas(item) <- 1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(exg)+c(0,500) #In column with EXG
+ExamplesHardEM <- RNetica::CreateNetwork("ExamplesHardEM", session)
+RNetica::CopyNodes(list(item),newnet=ExamplesHardEM)
+RNetica::WriteNetworks(ExamplesHardEM, file.path(outDir, "ExamplesHardEM.dne"))
+```
+
+## Extend -- tExtendGeometricXx 
+
+This is the same.  In this case, there is data for 1a and 1b, but they
+use the same evidence model.
+
+```{r ExtendBase}
+PnodeParents(item) <- list(ext)
+PnodeLnAlphas(item) <- c(ExtendGeometric=0)
+```
+
+## Make the Easy Variant EM
+
+```{r ExtendEasy}
+PnodeBetas(item) <- -1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(ext)+c(0,100) #In column with EXT
+ExtendEasyEM <- RNetica::CreateNetwork("ExtendEasyEM", session)
+RNetica::CopyNodes(list(item),newnet=ExtendEasyEM)
+RNetica::WriteNetworks(ExtendEasyEM, file.path(outDir, "ExtendEasyEM.dne"))
+```
+
+### Medium
+```{r ExtendMedium}
+PnodeBetas(item) <- 0
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(ext)+c(0,300) #In column with EXT
+ExtendMedEM <- RNetica::CreateNetwork("ExtendMedEM", session)
+RNetica::CopyNodes(list(item),newnet=ExtendMedEM)
+RNetica::WriteNetworks(ExtendMedEM, file.path(outDir, "ExtendMedEM.dne"))
+```
+
+## Hard
+
+```{r ExtendHard}
+PnodeBetas(item) <- 1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(ext)+c(0,500) #In column with EXT
+ExtendHardEM <- RNetica::CreateNetwork("ExtendHardEM", session)
+RNetica::CopyNodes(list(item),newnet=ExtendHardEM)
+RNetica::WriteNetworks(ExtendHardEM, file.path(outDir, "ExtendHardEM.dne"))
+```
+
+## Table-Extend -- tTableExtendGeometricXx
+
+In this case, we have two parents, with `Table` considered slightly more
+important.  Log alpha for `Table` is .45, for `Extend` is 0.
+
+```{r TableExtendBase}
+PnodeParents(item) <- list(tbg,ext)
+PnodeLnAlphas(item) <- log(c(TableGeometric=1.5,ExtendGeometric=1))
+```
+
+Single difficulty/demand parameter, so the rest of the code is very familiar.
+
+## Make the Easy Variant EM
+```{r TableExtendEasy}
+PnodeBetas(item) <- -1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(tbg)+c(0,100) #In column with TBG
+TableExtendEasyEM <- RNetica::CreateNetwork("TableExtendEasyEM", session)
+RNetica::CopyNodes(list(item),newnet=TableExtendEasyEM)
+RNetica::WriteNetworks(TableExtendEasyEM, file.path(outDir, "TableExtendEasyEM.dne"))
+```
+
+## Medium
+```{r TableExtendMedium}
+PnodeBetas(item) <- 0
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(tbg)+c(0,300) #In column with TBG
+TableExtendMedEM <- RNetica::CreateNetwork("TableExtendMedEM", session)
+RNetica::CopyNodes(list(item),newnet=TableExtendMedEM)
+RNetica::WriteNetworks(TableExtendMedEM, file.path(outDir, "TableExtendMedEM.dne"))
+```
+
+
+## Hard
+```{r TableExtendHard}
+PnodeBetas(item) <- 1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(tbg)+c(0,500) #In column with TBG
+TableExtendHardEM <- RNetica::CreateNetwork("TableExtendHardEM", session)
+RNetica::CopyNodes(list(item),newnet=TableExtendHardEM)
+RNetica::WriteNetworks(TableExtendHardEM, file.path(outDir, "TableExtendHardEM.dne"))
+```
+
+## Model-Table-Extend --tModelTableExtendGeometricXx
+
+Three parents presents no real difference.  Model is considered most
+important, so it gets a higher alpha than the others.
+
+
+```{r ModelTableExtendBase}
+PnodeParents(item) <- list(mdg,tbg,ext)
+PnodeLnAlphas(item) <- log(c(ModelGeometric=1.5,TableGeometric=1,
+                             ExtendGeometric=1))
+```
+
+
+### Make the Easy Variant EM
+
+```{r ModelTableExtendEasy}
+PnodeBetas(item) <- -1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(mdg)+c(0,100) #In column with MDG
+ModelTableExtendEasyEM <- 
+  RNetica::CreateNetwork("ModelTableExtendEasyEM", session)
+RNetica::CopyNodes(list(item),newnet=ModelTableExtendEasyEM)
+RNetica::WriteNetworks(ModelTableExtendEasyEM, 
+                       file.path(outDir, "ModelTableExtendEasyEM.dne"))
+```
+
+## Medium
+```{r ModelTableExtendMedium}
+PnodeBetas(item) <- 0
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(mdg)+c(0,300) #In column with MDG
+ModelTableExtendMedEM <- 
+  RNetica::CreateNetwork("ModelTableExtendMedEM", session)
+RNetica::CopyNodes(list(item),newnet=ModelTableExtendMedEM)
+RNetica::WriteNetworks(ModelTableExtendMedEM, 
+                       file.path(outDir, "ModelTableExtendMedEM.dne"))
+```
+
+## Hard
+```{r ModelTableExtendHard}
+PnodeBetas(item) <- 1
+BuildTable(item)
+RNetica::NodeVisPos(item) <- 
+  RNetica::NodeVisPos(mdg)+c(0,500) #In column with MDG
+ModelTableExtendHardEM <- 
+  RNetica::CreateNetwork("ModelTableExtendHardEM", session)
+RNetica::CopyNodes(list(item),newnet=ModelTableExtendHardEM)
+RNetica::WriteNetworks(ModelTableExtendHardEM, 
+                       file.path(outDir, "ModelTableExtendHardEM.dne"))
+```
+
+## Cleanup
+
+```{r DeleteItem}
+DeleteNodes(item)
+```
+
+# Building the spreadsheets
+
+Okay, at this point we have the complete model in memory.  We have a
+single proficiency (hub) model and a collection of evidence (spoke)
+models. 
+
+```{r HubSpoke}
+hub <- list(miniACED.PM)
+emspokes <- list(CommonRatioEasyEM,CommonRatioMedEM,
+               CommonRatioHardEM,
+               ExamplesEasyEM,ExamplesMedEM,ExamplesHardEM,
+               ExtendEasyEM, ExtendMedEM, ExtendHardEM,
+               TableExtendEasyEM, TableExtendMedEM,
+               TableExtendHardEM,
+               ModelTableExtendEasyEM,
+               ModelTableExtendMedEM,
+               ModelTableExtendHardEM)
+```
+
+Next read in the list of tasks:
+
+```{r TaskList}
+miniACED.EMtable <- read.csv("miniACED/MiniACEDEMTable.csv",row.names=1,
+                             as.is = 2)
+```
+
+## Building task-specific rulebooks (link models)
+
+There are `r length(spoke)` evidence models, but `r
+nrow(miniACED.EMtable)` tasks. This is because the evidence models are
+reused for several tasks.  For example both 'tCommonRatio1a.1'
+and 'tCommonRatio1b.1' use the `CommonRatioEasyEM`.  We can
+handle this in one of two ways:  (1) use the same evidence model for
+both tasks, or (2) make a copy of the EM for each task.  We will take
+the latter approach, as this will help us later when we calibrate the
+model, (as the 'Easy', 'Medium', 'Hard' designations are theories, not
+truth).
+
+In earlier writings, I have called these task-specific evidence models
+_link models_ or just _links_.  In my more recent writings, I've been
+calling them _books of evidence rules_ (the CPT associate with each
+observable is a statistical evidence rule).
+
+So, the next step is to go through the task list and build an evidence
+model for each task.  Note that the file also contains a location for
+the observable, so that when building the full motif (proficiency plus
+all evidence models) they will not lie on top of each other.
+
+So, we will also write them out under the new names, so that the new
+paths are saved.
+
+```{r buildLinks}
+
+lapply(1:nrow("miniACED.EMtable"),
+       function (i) {
+  oname <- row.names(miniACED.EMtable)[i]
+  netName <- gsub(".1","EM.1",onames)
+  emnet <- RNetica::GetNamedNetworks(miniACED.EMtable[i,"EM"],session)
+  linknet <- RNetica::CopyNetworks(emnet,netName)
+  obs <- PnetFindNode(linknet,"isCorrect")
+  ## Set the name of the node 
+  PnodeName(obs) <- oname
+  PnetTitle(linknet) <- oname
+  RNetica::NodeVisPos(newnode) <- miniACED.EMtable[i,c("X","Y")]
+  PnodeLabels(newnode) <- c("onodes","pnodes","Observables")
+  RNetica::WriteNetworks(linknet,
+                         file.path(outDir,paste0(netName,".dne"))
+  linknet
+       }) -> linkspokes
+```
+
+Note that in the setup above, we are setting the title of the network
+to the name of the observable.  The 'name' of the network is limited
+by the Bayes net implementation, in this case, Netica.  Netica insists
+that network names follow variable name rules (no spaces or special
+characters), but the 'title' is not restricted in this way.  The code
+above sets the title to the name of the task, which may be useful for
+writing the scoring engine.
+
+## Building the Network Manifest
+
+First, we need a list of all of the networks.  The function
+`BuildNetManifest` can be used to do this:
+
+```{r NetManifest}
+miniACEDnm <- BuildNetManifest(list(hub,linkspoke))
+head(miniACEDnm)
+write.csv(miniACEDnm,file.path(outDir,"miniACEDNetManifest.csv"))
+```
+
+## Building the Node Manifest
+
+This is a little bit more complex, as each network defines its own
+namespace.  Thus the variable `isCorrect`, which appears in each of
+the evidence models is a different copy of the same variable.  The
+second difference is that each node needs a different line for each
+state.  However, the `BuildNodeManifest` function will take care of
+most of this for us.
+
+```{r NodeManifest}
+
+
+```
+
+
+## Q-Matrix to Spreadsheet
+miniACED.Motif1 <- ReadNetworks("miniACEDFullMotif1.dne")
+miniACED.Motif1 <- as.Pnet(miniACED.Motif1)
+NetworkNodeSets(miniACED.Motif1)
+PnetPnodes(miniACED.Motif1)
+miniACED.prof <- NetworkNodesInSet(miniACED.Motif1,"Proficiencies")
+
+miniACED.obs <- NetworkNodesInSet(miniACED.Motif1, "Observables") 
+
+
+miniACED.Qmat <- Pnet2Qmat(miniACED.Motif1, miniACED.obs, miniACED.prof)
+write.csv(miniACED.Qmat,file="miniACED.Qmat.csv")
+
+

@@ -1,0 +1,62 @@
+// ~->[DNET-1]->~
+
+// File created by an unlicensed user using Netica 5.04 on 04/12/2022 at 17:58:51.
+
+bnet TableExtendMedEM {
+autoupdate = FALSE;
+whenchanged = 1649800731;
+user U1 {
+	Hub = "MiniACEDPM";
+	Pathname = "TableExtendMedEM.dne";
+	};
+
+param X_TableGeometric_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "TableGeometric";
+	whenchanged = 1649800731;
+	};
+
+param X_ExtendGeometric_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "ExtendGeometric";
+	whenchanged = 1649800731;
+	};
+
+node isCorrect {
+	kind = NATURE;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (Yes, No);
+	levels = (1, 0);
+	inputs = (TableGeometric, ExtendGeometric);
+	parents = (X_TableGeometric_1, X_ExtendGeometric_1);
+	probs = 
+		// Yes          No            // TableGeometric ExtendGeometric 
+		  (0.9482061,   0.05179393,   // High           High            
+		   0.8512425,   0.1487575,    // High           Medium          
+		   0.6414033,   0.3585968,    // High           Low             
+		   0.7618628,   0.2381372,    // Medium         High            
+		   0.5,         0.5,          // Medium         Medium          
+		   0.2381372,   0.7618628,    // Medium         Low             
+		   0.3585968,   0.6414033,    // Low            High            
+		   0.1487575,   0.8512425,    // Low            Medium          
+		   0.05179393,  0.9482061);   // Low            Low             ;
+	numcases = 10;
+	whenchanged = 1649800731;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"partialCredit\"";
+		lnAlphas = "c(TableGeometric = 0.405465108108164, ExtendGeometric = 0)";
+		betas = "0";
+		};
+	};
+};

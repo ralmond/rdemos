@@ -1,0 +1,25 @@
+---
+title: "ACED Sample Data"
+author: "Russell Almond"
+date: "5/17/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ACED Addaptive Content Using Evidence-Based Diagnosis.
+
+* Data:  [ACED5400-2.csv](https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/ACED5400-2.csv)
+
+* Bigger Version: [ACED-Subset-new.csv](https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/ACED-Subset-new.csv)
+  - SPSS Version: [ACED-Subset-new.sav](https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/ACED-Subset-new.sav)
+
+* Code Book:  [ACED5400-Codebook.docx](https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/ACED5400-Codebook.docx) [ACED5400-Codebook.pdf](https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/ADHDLab/ACED5400-Codebook.pdf)
+
+* References:
+
+Shute, V. J.; Hansen, E. G. & Almond, R. G. (2008). You Can't Fatten A Hog by Weighing It - Or Can You? Evaluating an Assessment for Learning System Called ACED. International _Journal of Artificial Intelligence in Education, 4_ (4), 289-316 . (URL http://www.ijaied.org/iaied/ijaied/abstract/Vol_18/Shute08.html )
+
+Shute, V. J.; Hansen, E. G. & Almond, R. G. (2007). An Assessment for Learning System Called ACED: The Impact of Feedback and Adaptivity on Learning.. ETS Research Report, RR-07-26 (URL https://www.ets.org/research/policy_research_reports/publications/report/2007/hsmy )

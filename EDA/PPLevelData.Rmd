@@ -1,0 +1,449 @@
+---
+title: "Physic Playground Data"
+output: html_notebook
+---
+
+# Loading and Preparing the data
+
+```{r setup}
+#install.packages("psych")
+#yinstall.package("googlesheets4")
+#install.package("CPTtools",repos="https://ralmond.r-universe.dev")
+library(CPTtools)
+library(tidyverse)
+library(rpart)
+library(psych)
+library(googlesheets4)
+options(dplyr.summarise.inform = FALSE)
+path <- "https://docs.google.com/spreadsheets/d/1gjtaXUxPFF_IMeT4rm1mPxlcFDNUC1u7cX-qPrUqtK0/edit#gid=1994010518"
+library(plotly)
+library(rpart.plot)
+
+#install.packages("e1071")
+library(caret)
+library(ggplot2)
+#library(GGally)
+```
+
+```{r read}
+ppLevel <- read_sheet(path,na="NA")
+```
+
+```{r summary}
+summary(ppLevel)
+```
+## Cleaning
+
+```{r mung varialble types, warning=FALSE}
+ppLevel$timestamp <- as.Date(ppLevel$timestamp)
+ppLevel$source <- as.factor(ppLevel$source)
+ppLevel$condition <- as.factor(ppLevel$condition)
+ppLevel$full_concept <- as.factor(ppLevel$full_concept)
+ppLevel$concept <- as.factor(ppLevel$concept)
+
+ppLevel$level <- as.factor(ppLevel$level)
+ppLevel$level_type <- as.factor(ppLevel$level_type)
+ppLevel$level_badge[is.na(ppLevel$level_badge)] <- "none"
+ppLevel$level_badge <-  ordered(ppLevel$level_badge,
+                               level=c("none","silver","gold"))
+ppLevel$ls_pa_start <- as.Date(ppLevel$ls_pa_start,format="%Y-%m-%dT%H:%M:%S")
+ppLevel$ls_pa_end <- as.Date(ppLevel$ls_pa_end,format="%Y-%m-%dT%H:%M:%S")
+
+```
+
+```{r resummerize}
+summary(ppLevel)
+```
+
+Setup names for variables that have common characteristics.
+
+```{r variable groups}
+id_vars <- c("row_id","timestamp","uid","source","consent","assent")
+target_var <- c("level_badge")
+factor_vars <- c("condition","full_concept","concept","level_revisit_tag")
+scaled_score_vars <- c("pre_near_by_concept", "pre_far_by_concept",               "post_near_by_concept", "post_far_by_concept",                 "pre_near_by_full_concept",       
+"pre_far_by_full_concept",         "post_near_by_full_concept",
+"post_far_by_full_concept")
+difficulties <- c("comp_difficulty","game_mechanic_difficulty","physics_understanding_difficulty")
+durations <- c("level_duration","ls_pa_duration")
+ls_vars <- c("ls_n_PA_spgbrd","ls_n_PA_lever","ls_n_PA_ramp",	"ls_n_PA_pendulum","ls_n_hint","ls_n_game_tools","level_ls_total")
+ob_count_vars <- c("ob_id_ramp","ob_id_lever","ob_id_spgbrd",	"ob_id_pendulum",	"ob_id_weight", "ob_comp_freeform",	"ob_comp_pin")
+
+```
+
+# Exploratory Data Analysis
+
+
+
+## Working Data
+
+Here I'm pulling out cases with extremely large durations and ones
+with missing data.  I'm also scaling the difficulties by their maximum values.
+
+
+```{r workingData}
+## These variables need no translation
+ppComplete <- ppLevel %>%
+  filter(level_duration < 3500 & is.finite(level_duration)) %>%
+  filter(!is.na(pre_near_by_concept)) %>%
+  filter(!is.na(pre_far_by_concept)) %>%
+  filter(!is.na(post_near_by_concept)) %>%
+  filter(!is.na(post_far_by_concept)) %>%
+  filter(!is.na(pre_near_by_full_concept)) %>%
+  filter(!is.na(pre_far_by_full_concept)) %>%
+  filter(!is.na(post_near_by_full_concept)) %>%
+  filter(!is.na(post_far_by_full_concept)) %>%
+  select(-row_id,-timestamp,-uid,-consent,-assent,
+         -level_wallet_balance,-ls_pa_start,-ls_pa_end) %>%
+  select(all_of(target_var), all_of(durations), -ls_pa_duration,
+         all_of(scaled_score_vars), all_of(difficulties),
+         all_of(factor_vars), all_of(ls_vars), 
+         all_of(ob_count_vars), level)
+
+
+## Var Groups: target_var, factor_vars, scaled_score_vars,
+## difficulties, durations, ls_vars, ob_count_vars
+
+         
+## Factor variables, we need to do one-hot encoding on each of these.
+# for (v in factor_vars) {
+#   ## as.numeric() -1 as keras is zero-base and R is one-based.
+#   hotCode <- to_categorical(as.numeric(pull(ppLevel,v))-1)
+#   colnames(hotCode) <- paste0(v,1:ncol(hotCode))
+#   ppWorking <- cbind(ppWorking,hotCode)
+# }
+
+##difficulties -- scale by max value.
+ppComplete$comp_difficulty <- ppComplete$comp_difficulty/8
+ppComplete$game_mechanic_difficulty <- ppComplete$game_mechanic_difficulty/4
+ppComplete$physics_understanding_difficulty <- ppComplete$physics_understanding_difficulty/4
+
+
+##ob_count_vars
+## zero flags
+#for (v in ob_count_vars) {
+#  vv <- sub("(id|comp)","flag",v)
+#  ppWorking[[vv]] <- pull(ppLevel,v) > 0
+#}
+# for (v in ob_count_vars) {
+#   vals <- pull(ppLevel,v)
+#   cutpoints <- c(-1,unique(quantile(vals,c(0,.25,.5,.75,1))))
+#   onehot <- to_categorical(as.numeric(cut(vals,cutpoints))-1)
+#   colnames(onehot) <- paste0(v,1:ncol(onehot))
+#   ppWorking <- cbind(ppWorking,onehot)
+# }
+
+summary(ppComplete)
+
+```
+
+# Exploratory Plots
+
+
+
+## Duration
+
+```{r first plot}
+ppComplete %>%
+    filter(level_duration < 3500) %>%
+    ggplot(aes(x = (level_duration))) +
+    geom_histogram() +
+    labs(
+        title = "Duration spent in level (filtered).",
+        x = "level_duation (in seconds)"
+    )
+ppComplete %>%
+    ggplot(aes(x = log(level_duration))) +
+    geom_histogram() +
+    labs(
+        title = "Duration spent in level (filtered).",
+        x = "level_duation (log; in seconds)"
+    )
+```
+
+
+```{r facet by trophy}
+
+ppComplete %>%
+    ggplot(aes(x = log(level_duration))) +
+    geom_histogram() +
+    labs(
+        title = "Duration spent in level (filtered).",
+        x = "level_duation (log; in seconds)"
+    ) + facet_grid(rows=vars(level_badge))
+```
+```{r violin by trophy}
+
+ppComplete %>%
+    ggplot(aes(x=level_badge,y = log(level_duration))) +
+    geom_violin() +
+    labs(
+        title = "Duration spent in level (filtered).",
+        x = "level_duation (log; in seconds)"
+    ) 
+```
+```{r violin by level}
+
+ppComplete %>%
+    ggplot(aes(x=level,y = log(level_duration))) +
+    geom_violin() +
+    labs(
+        title = "Duration spent in level (filtered).",
+        x = "level_duation (log; in seconds)"
+    ) 
+```
+
+```{r violin by all}
+
+for (v in colnames(ppComplete)) {
+  if (is.numeric(pull(ppComplete,v))) {
+      ppComplete %>%
+          ggplot(aes(x=.data[[v]],y = log(level_duration))) +
+          geom_point() + geom_smooth() -> P
+     
+  } else if (is.factor(pull(ppComplete,v))) {
+    ppComplete %>%
+      ggplot(aes(x=.data[[v]],y = log(level_duration))) +
+      geom_violin() -> P
+  }
+  print(P+ labs(
+        title = paste("Duration spent in level by ",v),
+        x = v,
+        y = "level_duation (log; in seconds)"
+      ) )
+}
+```
+
+## Object Counts
+
+```{r histograms}
+for (v in ob_count_vars) {
+print(ppComplete %>%
+      ggplot(aes(x=.data[[v]])) +geom_histogram()
+)}
+
+for(v in ob_count_vars)
+  cat(v,"=",paste(round(quantile(pull(ppLevel,v),c(0,.25,.5,.75,1)),0),
+                  collapse = " "),"\n")
+
+
+```
+
+## Pair plots
+
+
+```{r pair plots}
+ppComplete %>%
+  select(level_duration, level, comp_difficulty, physics_understanding_difficulty, game_mechanic_difficulty) %>%
+  pairs()
+```
+
+## Correlation Matrix
+```{r corr}
+ppComplete %>% 
+  mutate(log_duration=ifelse(level_duration>0,log(level_duration),NA)) -> ppLev1
+
+cor(pull(ppLev1,log_duration),
+    select(ppLev1,all_of(scaled_score_vars)),
+    use="pairwise.complete.obs")
+cor(pull(ppLev1,log_duration),
+    select(ppLev1,all_of(ob_count_vars)),
+    use="pairwise.complete.obs")
+cor(pull(ppLev1,log_duration),
+    select(ppLev1,all_of(difficulties)),
+    use="pairwise.complete.obs")
+
+cor(pull(ppLev1,log_duration),
+    select(ppLev1,all_of(ls_vars)),
+    use="pairwise.complete.obs")
+```
+
+```{r prepostcors}
+ppComplete %>% select(all_of(scaled_score_vars)) %>% cor(use="complete.obs")
+```
+
+
+
+
+# Build a Neural Net
+
+```{r load libraryies}
+library(tidyverse)
+library(keras)
+library(tfruns)
+library(tfdatasets)
+library(rsample)
+```
+
+
+```{r traintestsplit}
+ppWorking <- ppComplete %>%
+  select(level_badge,level_duration,
+         all_of(difficulties),
+         all_of(scaled_score_vars))
+
+
+testsplit <- initial_split(ppWorking, prop= 4/5)
+ppTest <- testing(testsplit)
+ppTrain <- training(testsplit)
+
+valsplit <- initial_split(ppTrain, prop= 4/5)
+ppVal <- testing(valsplit)
+ppTrain <- training(valsplit)
+nrow(ppTrain)
+nrow(ppVal)
+nrow(ppTest)
+
+```
+
+Hot encoding for categorical variables. (This is not used, but here for reference).
+
+```{r encode categorical variables.}
+ppTestBadge <- to_categorical(as.numeric(pull(ppTest,level_badge))-1)
+ppTrainBadge <- to_categorical(as.numeric(pull(ppTrain,level_badge))-1)
+ppValBadge <- to_categorical(as.numeric(pull(ppVal,level_badge))-1)
+```
+
+## Specify model
+
+Convert to tensorflow data.
+
+```{r tensorize}
+df_to_dataset <- function(df, shuffle = TRUE, batch_size = 32) {
+  ds <- df %>% mutate(level_badge=as.integer(level_badge)) %>%
+    tensor_slices_dataset()
+  
+  if (shuffle)
+    ds <- ds %>% dataset_shuffle(buffer_size = nrow(df))
+  
+  ds %>% dataset_map(function(record) {
+      record$level_badge <- tf$one_hot(record$level_badge,3L)
+      record}) %>%
+    dataset_batch(batch_size = batch_size)
+}
+batch_size <- 50
+train_ds <- df_to_dataset(ppTrain, batch_size = batch_size)
+val_ds <- df_to_dataset(ppVal, shuffle = FALSE, batch_size = batch_size)
+test_ds <- df_to_dataset(ppTest, shuffle = FALSE, batch_size = batch_size)
+
+
+```
+
+
+```{r check the process, eval=FALSE}
+train_ds %>% 
+  reticulate::as_iterator() %>% 
+  reticulate::iter_next() %>% 
+  str()
+```
+
+
+```{r preprocessing step}
+spec <- feature_spec(train_ds, level_badge ~ .) %>%
+  #step_bucketized_column(level_ls_total,boundaries=c(1)) %>%
+  step_numeric_column(level_duration, all_of(scaled_score_vars),
+                      normalizer_fn=scaler_standard()) %>%
+  step_categorical_column_with_vocabulary_list(all_nominal()) %>%
+  #step_indicator_column(all_nominal())
+  identity()
+spec <- fit(spec)
+```
+
+
+
+```{r ppmodel}
+
+ppmodel <- keras_model_sequential() %>%
+  layer_dense_features(dense_features(spec)) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dense(units = 3, activation = "softmax") %>%
+  compile(
+    loss = 'categorical_crossentropy',
+    optimizer = 'adam',
+    metrics = c('accuracy')
+  )
+```
+
+```{r train1}
+ppmodel %>% fit(dataset_use_spec(train_ds,spec=spec),
+                ppTrainBadge,
+               epochs=15,
+               validation_data = dataset_use_spec(val_ds,spec),
+               verbose=2)
+```
+
+```{r evaluate1}
+score1 <- ppmodel %>%
+    evaluate(dataset_use_spec(test_ds,spec), verbose = 0)
+
+round(score1,3)
+```
+```{r predict1}
+pred1 <- ppmodel %>% predict(dataset_use_spec(test_ds,spec))
+
+head(pred1)
+```
+
+
+## Discrete Predictions
+
+```{r modalPredictions}
+predMode <- ordered(apply(pred1,1,which.max)-1,  #Fix for renumbering levels in TF
+                    levels=1:3,labels=c("none","silver","gold"))
+
+summary(predMode)
+```
+```{r confusionMatrix}
+pred1CM <- table(ppTest$level_badge,predMode)
+pred1CM
+cat("Cohen's kappa is ",CPTtools::fcKappa(pred1CM),"\n")
+cat("Goodman & Kruskal's lambda is ",CPTtools::gkLambda(pred1CM),"\n")
+
+```
+
+
+## Probabilistic Predictions
+
+```{r scoreFunction}
+probtrue <- sapply(1:nrow(pred1),
+                  function (i) {
+                    pred1[i,as.numeric(ppTest$level_badge[i])]})
+head(probtrue)                  
+score <- -log(probtrue)
+sum(score)
+```
+The _expected confusion matrix_ is like the regular confusion matrix, except that we use the prediction probabilities instead of the absolute value.
+
+
+```{r ExpectedConfusionMatrix}
+ppredCM1 <- matrix(0,3,3,dimnames=list(levels(ppTest$level_badge),
+                   levels(ppTest$level_badge)))
+for (i in 1:nrow(pred1)) {
+  w <- as.integer(ppTest$level_badge[i])
+  ppredCM1[w,] <- ppredCM1[w,] + pred1[i,]
+}
+round(ppredCM1,1)
+cat("Cohen's kappa is ",CPTtools::fcKappa(ppredCM1),"\n")
+cat("Goodman & Kruskal's lambda is ",CPTtools::gkLambda(ppredCM1),"\n")
+
+```
+                  
+
+
+
+# CART model
+
+## Fit a model
+
+
+```{r first pass}
+tree1 <- ppTrain %>% 
+  rpart(level_badge ~ ., data = ., method = "class",
+        model=TRUE)
+tree1
+```
+
+```{r plotthethree}
+prp(tree1, type = 1, extra = 1, under = TRUE, split.font = 1, varlen = -10)
+```
+

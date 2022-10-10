@@ -1,0 +1,46 @@
+// ~->[DNET-1]->~
+
+// File created by an unlicensed user using Netica 5.04 on 04/12/2022 at 17:58:51.
+
+bnet CommonRatioEasyEM {
+autoupdate = FALSE;
+whenchanged = 1649800731;
+user U1 {
+	Hub = "MiniACEDPM";
+	Pathname = "CommonRatioEasyEM.dne";
+	};
+
+param X_CommonRatio_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "CommonRatio";
+	whenchanged = 1649800731;
+	};
+
+node isCorrect {
+	kind = NATURE;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (Yes, No);
+	levels = (1, 0);
+	inputs = (CommonRatio);
+	parents = (X_CommonRatio_1);
+	probs = 
+		// Yes          No            // CommonRatio 
+		  (0.9659281,   0.03407189,   // High        
+		   0.8455347,   0.1544653,    // Medium      
+		   0.5138423,   0.4861577);   // Low         ;
+	numcases = 10;
+	whenchanged = 1649800731;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"partialCredit\"";
+		lnAlphas = "c(CommonRatio = 0)";
+		betas = "-1";
+		};
+	};
+};

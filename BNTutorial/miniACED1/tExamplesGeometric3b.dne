@@ -1,0 +1,84 @@
+// ~->[DNET-1]->~
+
+// File created by an unlicensed user using Netica 5.04 on 04/12/2022 at 17:31:43.
+
+bnet tExamplesGeometric3b {
+autoupdate = FALSE;
+title = "tExamplesGeometric3b";
+whenchanged = 1649799103;
+
+visual V12 {
+	defdispform = BELIEFBARS;
+	nodelabeling = TITLE;
+	NodeMaxNumEntries = 50;
+	nodefont = font {shape= "Arial"; size= 9;};
+	linkfont = font {shape= "Arial"; size= 9;};
+	resolution = 72;
+	drawingbounds = (1080, 930);
+	showpagebreaks = FALSE;
+	usegrid = TRUE;
+	gridspace = (6, 6);
+	NodeSet Node {BuiltIn = 1; Color = 0x00E1E1E1;};
+	NodeSet Nature {BuiltIn = 1; Color = 0x00F8EED2;};
+	NodeSet Deterministic {BuiltIn = 1; Color = 0x00D3CAA6;};
+	NodeSet Finding {BuiltIn = 1; Color = 0x00C8C8C8;};
+	NodeSet Constant {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet ConstantValue {BuiltIn = 1; Color = 0x00FFFFB4;};
+	NodeSet Utility {BuiltIn = 1; Color = 0x00FFBDBD;};
+	NodeSet Decision {BuiltIn = 1; Color = 0x00DEE8FF;};
+	NodeSet Documentation {BuiltIn = 1; Color = 0x00F0FAFA;};
+	NodeSet Title {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet onodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet pnodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet Observables {Disabled = 1; Color = 0x00C8C8C8;};
+	PrinterSetting A {
+		margins = (1270, 1270, 1270, 1270);
+		};
+	};
+
+param X_ExamplesGeometric_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "ExamplesGeometric";
+	whenchanged = 1649799083;
+	};
+
+node tExamplesGeometric3b {
+	kind = NATURE;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (Yes, No);
+	levels = (1, 0);
+	inputs = (ExamplesGeometric);
+	parents = (X_ExamplesGeometric_1);
+	probs = 
+		// Yes          No            // ExamplesGeometric 
+		  (0.4861577,   0.5138423,    // High              
+		   0.1544653,   0.8455347,    // Medium            
+		   0.03407189,  0.9659281);   // Low               ;
+	numcases = 10;
+	whenchanged = 1649799103;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"partialCredit\"";
+		lnAlphas = "c(ExamplesGeometric = 0)";
+		betas = "1";
+		Truename = "tExamplesGeometric3b";
+		};
+	visual V12 {
+		center = (342, 894);
+		height = 1;
+		link 1 {
+			labelposn = (344, 834, 452, 849);
+			path = ((342, 834), (342, 858));
+			};
+		};
+	};
+NodeSet onodes {Nodes = (tExamplesGeometric3b);};
+NodeSet pnodes {Nodes = (tExamplesGeometric3b);};
+NodeSet Observables {Nodes = (tExamplesGeometric3b);};
+};

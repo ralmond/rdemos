@@ -1,0 +1,194 @@
+---
+title: "Item Analysis"
+author: "Russell Almond"
+date: "10/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(vcd)
+```
+
+## Download and Clean the Data
+
+This is a data dump from the midterm from Blackboard (student names and IDs have been stripped).  [I actually did a fair bit of pre-cleaning to strip out HTML codes from the response options.]
+
+Blackboard provides three different columns, `Auto.Score.n` for an item that was automatically scored (e.g., a Multiple Choice), `Manual.Score.n` for an item that is hand scored (e.g., free response) and both for items where there might be automatic scoring and automatic override.  This rather ugly bit of code calculates the final score for all items.
+
+It also strips out the maximum number of points.
+
+Finally, there are two sections, but this data is in a separate file.  So we merge that into the data file.
+
+
+```{r download and clean}
+# midterm <- read.csv("https://pluto.coe.fsu.edu/rdemos/ScaleAndInstrument/Midterm-Fall2011.download.csv",
+#                     header=TRUE)
+midterm <- read.csv(file.choose(),header=TRUE)
+
+midterm.scores <- data.frame(row.names=midterm$ID,
+                             Q01=midterm$Auto.Score.1,
+                             Q02=midterm$Auto.Score.2,
+                             Q03=midterm$Auto.Score.3,
+                             Q04=midterm$Auto.Score.4,
+                             Q05=midterm$Auto.Score.5,
+                             Q06=ifelse(!is.na(midterm$Manual.Score.6),midterm$Manual.Score.6,midterm$Auto.Score.6),
+                             Q07=ifelse(!is.na(midterm$Manual.Score.7),midterm$Manual.Score.7,midterm$Auto.Score.7),
+                             Q08=midterm$Auto.Score.8,
+                             Q09=midterm$Auto.Score.9,
+                             Q10=ifelse(!is.na(midterm$Manual.Score.10),midterm$Manual.Score.10,midterm$Auto.Score.10),
+                             Q11=midterm$Auto.Score.11,
+                             Q12=ifelse(!is.na(midterm$Manual.Score.12),midterm$Manual.Score.12,midterm$Auto.Score.12),
+                             Q13=ifelse(!is.na(midterm$Manual.Score.13),midterm$Manual.Score.13,midterm$Auto.Score.13),
+                             Q14=midterm$Auto.Score.14,
+                             Q15=midterm$Auto.Score.15,
+                             Q16=midterm$Auto.Score.16,
+                             Q17=midterm$Auto.Score.17,
+                             Q18=midterm$Auto.Score.18,
+                             Q19=ifelse(!is.na(midterm$Manual.Score.19),midterm$Manual.Score.19,midterm$Auto.Score.19),
+                             Q20=midterm$Auto.Score.20,
+                             Q21=midterm$Auto.Score.21,
+                             Q22=midterm$Auto.Score.22,
+                             Q23=midterm$Auto.Score.23,
+                             Q24=midterm$Auto.Score.24,
+                             Q25=midterm$Auto.Score.25,
+                             Q26=midterm$Auto.Score.26,
+                             Q27=midterm$Auto.Score.27,
+                             Q28=midterm$Manual.Score.28,
+                             Q29=ifelse(!is.na(midterm$Manual.Score.29),midterm$Manual.Score.29,midterm$Auto.Score.29),
+                             Q30=ifelse(!is.na(midterm$Manual.Score.30),midterm$Manual.Score.30,midterm$Auto.Score.30),
+                             Q31=midterm$Auto.Score.31,
+                             Q32=midterm$Manual.Score.32,
+                             Q33=ifelse(!is.na(midterm$Manual.Score.33),midterm$Manual.Score.33,midterm$Auto.Score.33),
+                             Q34=midterm$Manual.Score.34,
+                             Q35=midterm$Manual.Score.35,
+                             Q36=ifelse(!is.na(midterm$Manual.Score.36),midterm$Manual.Score.36,midterm$Auto.Score.36),
+                             Q37=midterm$Auto.Score.37,
+                             Q38=ifelse(!is.na(midterm$Manual.Score.38),midterm$Manual.Score.38,midterm$Auto.Score.38),
+                             Q39=midterm$Manual.Score.39)
+
+midterm.points <- midterm[,paste("Possible.Points",1:39,sep=".")]
+# 
+# sections <- read.table("https://pluto.coe.fsu.edu/rdemos/ScaleAndInstrument/Midterm-Fall2011.sections.txt",header=TRUE,sep="\t",row.names=1)
+
+sections <- read.table(file.choose(),header=TRUE,sep="\t",row.names=1)
+midterm <- data.frame(midterm,section=sections[midterm$ID,1])
+
+
+```
+
+###  Difficulty index:  p-value
+
+For binary items simply taking the average of the scores (presumably 0 and 1) gives the percentage who got it correct (_p-value_).
+
+The average scores for items that are not scored 0, 1 will obviously give values in different ranges.  Dividing by the maximum possible score puts all the p-values in the $[0,1]$ range.
+
+p-values which are high (above .8) indicate that the item is too easy to be providing good information.
+
+p-values which are too low (below .2, or below .25 for 4 option MC) indicate that the item is too hard.
+
+
+```{r p-values}
+item.pval <- rep(NA,39)
+for (j in 1:39) {
+  item.pval[j] <- mean( midterm.scores[,j]/midterm.points[,j])
+}
+
+round(item.pval,3)
+
+```
+
+## Discrimination:  Biserial Correlations (r-bis)
+
+Discrimination is a measure of the degree to which the effective construct measured by the item matches the effective construct measured by the rest of the test.
+
+To calculate this, I will use an R trick that providing a negative index selects all items but the indicated one.  Thus, define the following helper function:
+
+```{r rest-score}
+rest.score <- function (j) {
+  apply(midterm.scores[,-j],1,sum)
+}
+```
+
+Use this in calculating the biserial correlations.
+
+```{r rbis}
+item.rbis <- rep(NA,39)
+for (j in 1:39) {
+  item.rbis[j] <- cor(midterm.scores[,j],rest.score(j))
+}
+round(item.rbis,3)
+```
+
+## Look at the High/Low method
+
+First split students up into groups.
+
+```{r HL}
+midterm.total <- rowSums(midterm.scores)
+midterm.HL <- cut(midterm.total,
+                  quantile(midterm.total, 
+                           c(0,.27,1-.27,1)),
+                     include.lowest=TRUE)
+head(midterm.HL)
+levels(midterm.HL) <- c("L","M","H")
+head(midterm.HL)
+
+```
+```{r}
+midterm.pH <- colMeans(midterm.scores[midterm.HL=="H",])/midterm.points[1,]
+midterm.pL <- colMeans(midterm.scores[midterm.HL=="L",])/midterm.points[1,]
+round(midterm.pH-midterm.pL,3)
+round(100*log10(midterm.pH/midterm.pL),2)
+```
+
+
+
+## Put this in a table so it is easier to look at:
+
+```{r iatable}
+data.frame(item=1:length(item.pval),
+           "p-value"=round(item.pval,3),
+           "r-bis"=round(item.rbis,3),
+           "pH-pL"=as.vector(round(midterm.pH-midterm.pL,3)),
+           "WOE"=as.vector(round(100*log10(midterm.pH/midterm.pL),2)))
+```
+
+## Differential Item Functioning
+
+The two sections had two instructors, so it is reasonable to ask if the items were harder or easier for one group of students.  The groups are sometimes called the "focal" and "reference" groups.
+
+Just looking at the p-values by group won't get us there because the average ability of the students might be different in the two groups.
+
+Solutions:  Split the students into strata by ability, then see if the percent correct is roughly similar between the two groups. 
+
+Here we will do a split by quartiles:
+
+```{r quartiles}
+midterm.total <- rowSums(midterm.scores)
+midterm.quart <- cut(midterm.total,quantile(midterm.total),
+                     include.lowest=TRUE)
+head(midterm.quart)
+sect <- sections$Section[1:66]
+
+```
+
+Next we work item-by-item.  First make a 2x2x4 table for the item.
+
+```{r table}
+tab12 <- table(as.factor(midterm.scores[,12]),sect,midterm.quart)
+tab12
+```
+
+```{r}
+mosaic(tab12)
+```
+
+
+We can use the Mantel-Haenszel test to determine if the size of the difference between strata is surprising.
+
+```{r MHtest}
+mantelhaen.test(as.factor(midterm.scores[,12]),sect,midterm.quart)
+```
+

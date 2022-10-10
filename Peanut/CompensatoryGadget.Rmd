@@ -1,0 +1,436 @@
+---
+title: "Compensatory Distributions"
+author: "Russell Almond"
+date: "2/14/2022"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+library(shinyjs)
+```
+
+This demonstration shows how to build and set the parameters for a
+compensatory distribution using the DiBello framework.
+
+The DiBello method has three steps:
+
+1. Mapping the input variables to continuous values (effective
+   thetas), using the `PnodeStateValues` property of the `PNode`
+   object.
+
+2. Combining the parent thetas into a single \dQuote{effective theta}
+   for the child variable using the rule specified in the `PnodeRule`
+   property of the child node.
+   
+3. Mapping the effective theta back into a conditional probability
+   table using the `PnodeLink` function.
+
+
+The `CompensatoryGadget` is a way of visualizing the parameters when the rule is the `Compensatory` rule.
+
+## Preliminaries
+
+These gadgets use code from the
+[Peanut](https://pluto.coe.fsu.edu/RNetica/Peanut.hmtl) package, but
+that requires a Bayes net implementation to support the code.  The
+implementation we will use is `PNetica`.  Loading `PNetica` will load
+`Peanut`, `RNetica` and `CPTtools` (which does most of the
+computations).  
+
+If you want to try tweaking this, the Rmd source can be found at
+https://pluto.coe.fsu.edu/svn/common/rgroup-shiny/Peanut/CompensatoryGadget.Rmd
+
+
+```{r library}
+library(PNetica)
+```
+
+Next we need to start a Netica session to store our networks.
+
+```{r session}
+sess <- RNetica::NeticaSession()
+RNetica::startSession(sess)
+```
+
+We are only building a really small net, so the demo version is fine.
+
+## Build a small network.
+
+Create a network with two parent variables (`theta1`, `theta2`) and
+one child (`partialCredit`). 
+
+```{r structure}
+tNet <- RNetica::CreateNetwork("TestNet",sess)
+
+theta1 <- RNetica::NewDiscreteNode(tNet,"theta1",
+                         c("High","Mid","Low"))
+# Uniform distribution over parents
+PnodeProbs(theta1) <- rep(1/PnodeNumStates(theta1),PnodeNumStates(theta1))
+
+theta2 <- RNetica::NewDiscreteNode(tNet,"theta2",
+                         c("High","Mid","Low"))
+PnodeProbs(theta2) <- rep(1/PnodeNumStates(theta1),PnodeNumStates(theta2))
+
+partial3 <- RNetica::NewDiscreteNode(tNet,"partial3",
+                   c("FullCredit","PartialCredit","NoCredit"))
+PnodeParents(partial3) <- list(theta1,theta2)
+```
+
+## Effective Thetas
+
+The key idea of the DiBello model is that associated with each
+observable outcome variable (in other words, a child of several skill
+variables) is an effective dimension, $\theta$, in which students who
+are higher in this dimension will perform better than students who are
+lower.  DiBello suggested mapping each configuration of the parent
+variables (corresponding to the rows in the conditional probability
+table) into an \dQuote{effective theta}.  This is done in two steps:
+first, each parent state is mapped to a real number; and second, a
+combination rule is used to combine the parent values.
+
+In Psychometrics, it is customary to think of $\theta$ and a unit
+normal variable, corresponding to the population distribution of
+interest.  As the scale and location are arbitrary, the mean and
+standard deviation is set to one.  Therefore 0, corresponds to the
+median of the population, 1 to the `r round(100*qnorm(1),1)`
+percentile and -1 to the `r round(100*qnorm(-1),1)` percentile.
+
+
+For a number of reasons (see Almond, et al., 2015), equally spaced
+quantiles of a normal distribution are a good starting point for
+setting these values.  The function `CPTtools::effectiveThetas(n)`
+calculates these quantiles for a variable with $n$ categories.  Thus,
+the code sample below is the recommended practice.
+
+```{r effectiveTheta}
+effectiveThetas(3)
+PnodeStateValues(theta1) <- effectiveThetas(PnodeNumStates(theta1))
+PnodeStateValues(theta2) <- effectiveThetas(PnodeNumStates(theta2))
+```
+
+The setter form of `PnodeStateValues(node)` should take a numeric
+vector of the same length as the number of states of `node`.  Analysts
+are free to experiment with other mappings, but not that the mapping
+is defined at the level of the parent node, so that any child that has
+`theta1` as a parent will use the same state values.
+
+## Compensatory Combitnation Rule
+
+The compensatory combination rule is simply a weighted average of the
+effective thetas.  Let $r$ be an index for the row of the conditional
+probability table, and let $\tilde {\theta_k(r)}$ be the effective
+theta value for the $k$th parent in that row.  Then the effective
+theta values for that row is:
+
+$$ \tilde{\theta(r)} = 
+   \frac{1}{\sqrt{K}} \sum_k \alpha_{k},\tilde{\theta_{k}(r) - \beta_v$$
+
+Here $k$ is an index over the parent variables, and $v$ is an index
+over the states of the child variable.  By convention, the lowest
+value child variable is given an effective theta of $-\infty$, so it
+does not need to be specified.
+
+The factor $1/\sqrt{K}$ is a variance stabilization term.  (Without it
+the varaiance of $\tilde{\theta(r)} would increase as more and more
+parents are added).
+
+We have two types of parameters:
+
+* _discriminations_ (also called slopes), the ${\alpha_k}$ values.
+  These are inspected/set with the `PnodeAlphas()` function.  The
+  value should be a vector corresponding to the parent variables (so
+  of length $K$).  In most psychometric applications, the alphas are
+  constrained to be strictly positive, so for the purposes of model
+  fitting, $\log({\alpha_k})$ is taken as the parameter.  The function
+  `PnodeLnAlphas()` works with this transformed parameter space.
+  
+* _demands_ (also called difficulties or negative intercepts), the
+  $\beta_v$ values are related to how prevelent each state is for a
+  person of median ability.  The exact meaning depends on the link
+  function.  This value should be a __list__ with one fewer elements
+  than the number of states (by convention, the lowest state is
+  omitted).
+
+The convention used in both `CPTtools` and `Peanut` is that if the
+parameter is indexed by parent variables, it is a `vector`, and if it is
+indexed by states of the child variable, it is a `list`.  This allows
+some more complex expressions where parameters vary by both parents
+and child states, see [DPCGadget](DPCGadget.Rmd).
+
+The function `CPTtools::eThetaFrame()` is used to show the effective
+theta calculations.  It takes four arguments:  `skillLevels` which is
+a list of the `ParentStateValues()` for each parent node, `lnAlphas`
+which is the vector of log alphas, `beta` which is the demand, should
+be a scalar, and the `rule` which is a special function.  In this
+case, `CPTtools::Compensatory`.
+
+```{r compensatory eTheta, echo=TRUE}
+eThetaFrame(ParentStates(partial3),log(c(Skill1=1.2,Skill2=.8)),0,
+            Compensatory)
+```
+
+The first two numeric columns in this data frame show the effective
+thetas for the parent variables.  The final column, shows the result
+of applying the `Compensatory()` function with the specified parameters.
+
+Note that the combination rule is itself a parameter (set with the
+`PnodeRule()` function).  Any function with the same arguments would
+work.  The `CPTtools` package supplies two, `Conjunctive()` (based on
+minimum) and `Disjunctive()` (based on max).  However, two variants of
+these `OffsetConjuctive()` and `OffsetDisjunctive()`, which use a
+slightly different parameterization are more useful.  See
+[OffsetGadget](OffsetGadget.Rmd) to look at those.
+
+## Link Function
+
+The effective theta associates a value on this imaginary scale for
+each configuration of the parent values.  The next step is to map that
+value back into probabilities for the states of the child value.
+`CPTtools` and `Peanut` assume that variables are ordered categorial
+variables, ordered from highest to lowest.  Label them as integers,
+from highest to lowest, ending at zero, so $v \in \{S-1,\ldots,0\}$.  
+
+First consider the case of a binary variable.  Defining the
+probability $v=1$ is sufficient (as the probability of $v=0$ will just
+be the complement of that value).  A natural choice of of link
+function is the inverse logistic function:
+
+$$ \Pr(V=1) = \text{logit}^{-1}(\tilde{\theta(r)}) =
+\frac{1}{1+e^{-D\tilde{\theta(r)}} \
+.$$
+
+(Here $D=1.7$ is a constant chosen to make the logistic curve very
+close to the normal ogive.)
+
+There are currently two implemented frameworks for moving from binary
+to ordered categorical child variables:  the graded response and
+partial credit frameworks.
+
+For both of these frameworks, there are now muliple effective thetas
+for each row, $\tilde{\theta_v(r)}$.  (As the probability vector must
+be normalized, the value of $\tilde{\theta_0(r)}$ is chosen to make
+the normalization work out.)
+
+Using the _graded response_ link function, `CPTtools::gradedResponse`,
+the levels of the variable correspond to increasingly high ratings
+given to the outcome by a rater.  In particular, 
+
+$$\Pr(V \ge v) = \text{logit}^{-1}(\tilde{\theta_v(r)}). $$
+
+By convention $\tilde{\theta_0(r)} = \infty$ and
+$\tilde{\theta_V(r)}=-\infty$.  So the $\Pr(V = v)$ can be calculated
+by taking the difference of two curves.
+
+Note that to avoid having the curves cross, $\tilde{\theta_v(r)} >
+\tilde{\theta_{v+1}(r)}$ for all $v$.  This means that $\beta_v <
+\beta_{v+1}$ for all $v$.  Thus `PnodeBeta` must be a list of
+increasing values.
+
+The _partialCredit_ link function is based on the idea that the child
+variable represpents the completetion of a multi-step task.  Thus
+$\tilde{\theta_v(r)$ represents the subject's ability to successfully
+complete Step $v$, that is
+
+$$\Pr(V \ge v| V \ge v-1) = \text{logit}^{-1} (\tilde{\theta_v(r)})\
+.$$
+
+Fixing $\Pr(V \ge 0)=1$, the probability of reaching any point can be
+calculated in a straightforward way.  The function
+`CPTtools::partialCredit()` does this.  
+
+Note that the partial credit link function is a bit more flexible than
+the graded response.  There is no requirement that the demands be
+ordered from most to least demanding.  As a matter of fact, there is
+no requirement that the steps have the same discriminations.  The
+vignette [DPCGagdget](DPCGadget.Rmd) looks at this more expressive
+langauge.
+
+## Nodes and Pnodes
+
+A `Pnode` is an ordinary node wrapped in some extra functions so it
+can store information about the parameterization and parameters.  The
+package `PNetica` (the first and currently only implementation of the
+`Peanut` protocol) adds implementation for the function in the
+`Peanut` protocol.  The functions are:
+
+* `is.Pnode`, `as.Pnode`, `Pnode` --- class definition objects.
+* `PnodeNet` --- fetches the network.
+* `PnodeName`, `PnodeTitle`, `PnodeDescription`, `PnodeLabels`,
+`PnodeStates`, `PnodeStateTitles`, `PnodeStateDescriptions`,
+`PnodeStateBounds`, `isPnodeContinuous`, `PnodeProbs` --- These are
+just generic names for common opperations supported by most Bayesian
+network packages.
+* `PnodeParents`, `PnodeParentNames`, `PnodeNumParents` --- These
+  functions are related to the structure of the network.
+
+The functions listed above are all generic.  Any implementation of the
+`Peanut` protocol will supply methods for these.  Therefore, if a
+programmer uses these functions, a different Bayesian network engine
+can be easily subsituted for `PNetica`.
+
+These next functions are important to the `Peanut` protocol.
+
+* `PnodeStateValues` --- This associates each state with a real value
+  (see effective thetas above).  `PnodeParentTvals` fetches the state
+  values for all of the parent nodes.
+* `PnodeRules` --- The combination rule, e.g., `CPTtools::Compensatory`
+* `PnodeLink` --- The link function, e.g., `CPTtools::partialCredit`
+  or `CPTtools::gradedResponse`.  The link function
+  `CPTtools::normalLink` needs a scale parameter, this is accessed
+  with `PnodeLinkScale`.
+* `PnodeAlphas`, `PnodeLnAlphas` --- These access the the slope or
+  discrimination parameters.  The two functions access the same set of
+  parameters, it is just that one has the parameters on the log scale
+  and one on the natural scale.  For the `Compensatory` rule, the
+  length of the alpha vector should match the number of parents.  The
+  function `defaultAlphas` will return a vector of log alphas the appropriate
+  length. 
+* `PnodeBetas` -- These access the demand or difficulty (negative
+  intercept) parameters.  For the `partialCredit` and `gradedResponse`
+  vectors, these should be a __list__ whose length is one less than
+  the number of states.  The
+  function `defaultAlphas` will return a vector of betas the appropriate
+  length.  
+
+* `PnodeQ` -- With the `partialCredit` link function, only a subset of
+  the parent variables need to be included in each transtion.  See the
+  [DPCGadget](DPCGadget.Rmd) for details.
+
+* `PnodePriorWeight`, `PnodePostWeight`, `GetPriorWeight` ---  These
+  functions are related to doing learning, they are weights
+  (equivalent to numbers of observations) which should be given to the
+  prior distribution when fitting the models.
+
+* `BuildTable` --- This is the workhorse function which takes the
+  parameters desribed above.
+
+The \dQuote{constructor} `Pnode()` is not a real constructor function,
+rather it takes a node object, and sets the default properties so that
+it functions as a `Pnode`.  This will set the rule and link properties
+(what is shown below is the default).
+
+```{r defaultParameters}
+# Usual way to set rules is in constructor
+partial3 <- Pnode(partial3,rules="Compensatory", link="gradedResponse")
+```
+
+We can set either the alphas, or the log of the alphas.  The default
+is to set the log alphas to 0, which makes the alphas 1.  These are
+set as a vector whose names should match the parents
+
+```{r setAlpha}
+PnodeAlphas(partial3)
+PnodeLnAlphas(partial3)
+PnodeParentNames(partial3)
+PnodeAlphas(partial3) <- c(theta1=1.2,theta2=.8)
+PnodeLnAlphas(partial3)
+```
+
+The betas are set as a list.  This should correspond to the states of
+the node, with the last (smallest value) omitted.
+
+```{r setBeta}
+PnodeBetas(partial3)
+PnodeStates(partial3)
+PnodeBetas(partial3) <- list(FullCredit=1.0,PartialCredit=0.0)
+PnodeBetas(partial3)
+```
+
+The function `BuildTable()` will produce the conditional probability
+table.  Although we do not use the prior weights unless we are
+calibrating the model, the `BuildTable` function checks that they are
+set, so we need to do that before building the table.  The
+`PnodeProbs()` function returns an array; the funciton
+`CPTtools::as.CPF()` converts it into the more compact data frame
+representations.
+
+
+```{r buildit}
+PnodePriorWeight(partial3) <- 10
+BuildTable(partial3)
+as.CPF(PnodeProbs(partial3))
+```
+
+The function `barchart.CPF` (which extends the lattice function
+`barchart`) will build a visualization of the CPF.  The `baseCol`
+argument can be any R color specification, it is then used as the base
+color for the graph. 
+
+```{r barchart}
+barchart.CPF(as.CPF(PnodeProbs(partial3)),baseCol="royalblue")
+```
+
+
+## The Gadget
+
+This is a lot to remember.  The `Peanut` package provides a shiny
+gadget which allows an analyst to adjust the parameters of the model,
+and then save them back to the node object if the analyst finds a set
+of values that the analyst likes.  
+
+The `CompensatoryGadget` makes the following assumptions about the
+node:
+
+* The rule used has the same arguments as `Compensatory`, that is it
+  expects one alpha per parent, and a scalar beta.  That is, it is one
+  of `Compensatory`, `Conjunctive` or `Disjunctive`.
+* The link function expects one fewer betas than levels of the child
+  variable, that is it is `gradedResponse` or `partialCredit`.
+* The number of relevant alphas is the same for each state of the
+  child variable, and the alpha values are the same.
+  
+
+Adjusting the parameter causes the display of the conditional
+probability table to adjust itself to the new parameters.  The tabs
+allow the view to switch to the table or a table of the effective
+thetas.  Pressing the "OK" button will cause the values of the
+node being edited to be adjusted to the new values.  Pressing
+"Cancel" will raise a cancel error, and the node parameters will
+not change.
+
+This is invoked using the following command:
+
+```{r gadget, eval=FALSE}
+partial3 <- CompensatoryGadget(partial3)
+```
+
+[As Pnode objects are reference (R6) objects not functional objects,
+`partial3` would be modified without the assignment.  However, putting
+the assignment is good style as it reminds R programers that
+`partial3` is modified.]
+
+The function `CompensatoryGadget` opens the gadget in a web browser or
+as a special web page.  The function `MakeCompensatoryGadget` returns
+the guts of the gadget and allows it to be embedded in a Rmarkdown
+document.  So you can play with the compensatory gadget below.
+
+```{css, echo = FALSE}
+.shiny-frame{height: 1000px;}
+```  
+
+```{r shinyapp, fig.height=8, out.height=8, echo=FALSE}
+gadget <- MakeCompensatoryGadget(partial3)
+shinyApp(gadget$ui,gadget$server,options(height="2000px"))
+```
+
+## Other Gadgets
+
+
+* [CompensatoryGadget](CompensatoryGadget.Rmd) --- Simple applications
+  of the `Compensatory` rule where there is a single discrimination
+  (alpha) parameter for each parent variable.
+* [OffsetGadget](OffsetGadget.Rmd) --- Simple applications
+  of the `OffsetConjunctive` and `OffsetDisjunctive` rules, where
+  there is a different demand (beta) parameter for each parent
+  variable.
+* [RegressionGadget](RegressionGadget.Rmd) --- For situation in which
+  the `normalLink` is used.
+* [DPCGadget](DPCGadget.Rmd) --- Fully featured gadget which allows
+  for different alphas and betas for all parent--child state
+  combinations.
+  
+  
+

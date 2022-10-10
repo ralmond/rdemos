@@ -1,0 +1,88 @@
+// ~->[DNET-1]->~
+
+// File created by an unlicensed user using Netica 5.04 on 04/12/2022 at 17:59:43.
+
+bnet tCommonRatio2aEM {
+autoupdate = FALSE;
+title = "tCommonRatio2a";
+whenchanged = 1649800783;
+
+visual V3 {
+	defdispform = BELIEFBARS;
+	nodelabeling = TITLE;
+	NodeMaxNumEntries = 50;
+	nodefont = font {shape= "Arial"; size= 9;};
+	linkfont = font {shape= "Arial"; size= 9;};
+	resolution = 72;
+	drawingbounds = (1080, 720);
+	showpagebreaks = FALSE;
+	usegrid = TRUE;
+	gridspace = (6, 6);
+	NodeSet Node {BuiltIn = 1; Color = 0x00E1E1E1;};
+	NodeSet Nature {BuiltIn = 1; Color = 0x00F8EED2;};
+	NodeSet Deterministic {BuiltIn = 1; Color = 0x00D3CAA6;};
+	NodeSet Finding {BuiltIn = 1; Color = 0x00C8C8C8;};
+	NodeSet Constant {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet ConstantValue {BuiltIn = 1; Color = 0x00FFFFB4;};
+	NodeSet Utility {BuiltIn = 1; Color = 0x00FFBDBD;};
+	NodeSet Decision {BuiltIn = 1; Color = 0x00DEE8FF;};
+	NodeSet Documentation {BuiltIn = 1; Color = 0x00F0FAFA;};
+	NodeSet Title {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet onodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet pnodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet Observables {Disabled = 1; Color = 0x00C8C8C8;};
+	PrinterSetting A {
+		margins = (1270, 1270, 1270, 1270);
+		};
+	};
+user U1 {
+	Hub = "MiniACEDPM";
+	Pathname = "CommonRatioEasyEM.dne";
+	};
+
+param X_CommonRatio_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "CommonRatio";
+	whenchanged = 1649800731;
+	};
+
+node tCommonRatio2a {
+	kind = NATURE;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (Yes, No);
+	levels = (1, 0);
+	inputs = (CommonRatio);
+	parents = (X_CommonRatio_1);
+	probs = 
+		// Yes          No            // CommonRatio 
+		  (0.8381621,   0.1618378,    // High        
+		   0.5,         0.5,          // Medium      
+		   0.1618378,   0.8381621);   // Low         ;
+	numcases = 10;
+	whenchanged = 1649800783;
+	user U1 {
+		Q = "TRUE";
+		rules = "\"Compensatory\"";
+		link = "\"partialCredit\"";
+		lnAlphas = "c(CommonRatio = 0)";
+		betas = "0";
+		Truename = "tCommonRatio2a";
+		};
+	visual V3 {
+		center = (136, 534);
+		height = 1;
+		link 1 {
+			labelposn = (138, 474, 215, 489);
+			path = ((136, 474), (136, 498));
+			};
+		};
+	};
+NodeSet onodes {Nodes = (tCommonRatio2a);};
+NodeSet pnodes {Nodes = (tCommonRatio2a);};
+NodeSet Observables {Nodes = (tCommonRatio2a);};
+};

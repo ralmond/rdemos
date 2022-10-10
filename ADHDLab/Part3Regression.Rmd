@@ -1,0 +1,524 @@
+---
+title: "Lab Part 3:  Regression"
+author: "Russell Almond"
+date: '2022-06-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Abstract
+
+
+This lab returns to the ADHD data and explores a relationship between
+ADHD symptoms (`hyper` and `inatt`) and measures of anxiety (`GADD`, `genaxa`)
+and panic (`PAG` and `paa`) noticed by Prevatt et al (2015). At the end of
+this lab you should be able to perform a simple linear regression,
+including diagnostics and prediction. The scientific questions
+addressed by these data are "Can the impulsivity symptoms be used to
+predict general anxiety in ADHD patients?"
+
+## 1. ADHD and College Performance
+
+Prevatt, Dehili, Taylor and Marshall (2015) were interested in how the
+symptoms of attention deficit hyperactivity disorder (ADHD) affect the
+performance of college students. To study this, they looked at the
+relationship of the two key symptoms of ADHD, inattention and
+impulsivity, on measures of both academic and general anxiety and
+panic.  In other words, they were looking for a correlation between
+the symptom variables and the measures of academic anxiety. In this
+case, we are going to examine the relationship between ADHD symptoms
+and the anxiety measures. The primary questions in this lab are:
+
+* Is it advisable to use linear regression to predict the anxiety (or panic)
+  score from the ADHD symptom scores? What is the prediction line? How
+  much of the variance in the anxiety and panic scores can be predicted
+  by the ADHD Symptoms?
+
+To do this, we will perform a series of regressions.  The $X$
+variables will be chosen from the ADHD scores, `hyper`, `inatt` and
+the sum of `hyper` and `inatt` (which you made in Part 2).  For the
+$Y$ axis, you can choose any of the four varables:
+
+* `GADD` -- General Anxiety
+* `genaxa` -- General Academic Anixiet
+* `PAG` -- General Panic attacks.
+* `paa` -- Panic Attacks Academic.
+
+(Note that although I'm using the SPSS variable names so that you know
+which variables I'm referencing, your audience will not know these
+names, so you will need to explain them.  It is normally better to
+spell them out, unless the abbreviation is used a lot).
+
+Note also that you only need to pick one of the four choice for $Y$
+variable; your choice.
+
+* Is there any reason to believe that the regression is different for
+  students from different years?
+
+In particular, are the grad students different from the undergrads.
+
+## 2. The Data
+
+1.  The data file with the data for this lab is called
+    Alec-5400Subset.csv. This is the same data set used in the first
+    lab. Refer to the first lab handout for instructions on reading the
+    data set in. (If you saved your data as an SPSS .sav file after the
+    first lab, you can use that instead of reading it in again).
+
+
+Don't forget that you need to (a) add human readable labels to the
+variables, (b) add string values for the nominal and ordinal variables,
+and (c) make sure the value `-9` is coded as missing. *Note Bene! The
+default variable names are all programmers codes, and not human
+readable. You will need to fix this for full style points.*
+
+This data set has lots of missing data. Some of the data are missing at
+random, some of those data are structurally missing. In particular, the
+control students did not have all of the same measures taken about their
+performance that the ADHD students did. We can use some descriptive
+statistical analysis to see who is in our data set. In particular, use
+the `[A]{.underline}nalyze \> Compare [M]{.underline}eans \>
+[M]{.underline}eans ... \[ALT+A M M\]` command to compare the sample
+sizes of the general anxiety score (GADD) and the hyperactive impulse
+symptoms (hyper) for the control and ADHD groups. 
+What do you see?  What does that say about who is included in the
+sample? 
+
+Note that the SPSS scatterplot, correlation and
+regression commands will only use complete cases---students who have
+both anxiety and impulsivity scores---in the analysis.  So make sure
+you explain who these students are.
+
+## 3. Scatterplots
+
+The first step in a regression analysis is usually to look at
+potential $X$ and $Y$ variables one at a time.  This was what Part 2
+of the lab is about.  So the next step now starts to look at pairs of
+variables.
+
+The basic exploratory tool for exploring the relationship between two
+continuous variables is the scatterplot. The command for building a
+scatterplot is `[G]{.underline}raphs \> [L]{.underline}egacy Dialogs \>
+[S]{.underline}catter/Dot\...\[ALT+ G L S\]`.  In some ways, it
+doesn't matter which variable is $X$ and which is $Y$ (reversing $X$
+and $Y$ produces a plot that is mirrored along the diagonal).
+However, the convention is that $Y$ is predicted from $X$.  Often
+there is an implicit causal model in this choice.  As the implicit
+causal model here is that ADHD causes anxiety and panic, the ADHD
+symptoms are better placed on the $X$-axis, and the anxiety and panic
+checklists on the $Y$-axis.
+
+
+### 3.1 Adding a Regression Line
+
+Statistical modeling always contains assumptions, which should be
+checked if possible.  The key assumption of linear regression is that
+the relationship between $X$ and $Y$ is linear, or at least not
+non-linear.  If there is a definite curve, then linear regression is
+not the best choice.  
+
+To check linearity, add a regression line to the scatterplot. 
+Double click on the graph to open the graph editor, and then select
+the line tool (looks like a line going through points).  This will add
+a regression line.  (Note that by default, SPSS adds the
+equation of the line, but this often covers over data points.  If it
+can't be draged out of the way, there is a control in the line dialog
+box that gets rid of it.)  If linear regression is an appropriate
+model for the data, then the point cloud should look like an elipse
+around the regression line.  Note that the regression line could be
+nearly horizontal and the elipse looks more like a cirlce.  That is
+fine, too.  This just means that the relationship between $X$ and $Y$
+is weak and the correlation and slope of the line will be close to
+zero.  
+
+The problem is when the data have a distinct curve.  Adding a
+lowess[^1] curve to the plot helps spot curves.  To add the lowess
+curve, with the plot in the graph editor, click on the line icon a
+second time.  This will add a second curve; the default is the lowess
+curve.  As it is a local regression, it generally follows the wiggles
+of the data.  It can be difficult sometimes to determine if a given
+wiggle in the lowess curve is a real change in the data (a curve or a
+leveling off).
+
+What can be done if there is a curve?
+
+* Fit a curve (e.g., a polynomial) instead of a linear regression.
+  (This is covered in EDF 5401).
+  
+* Replace $X$ or $Y$ (or both) with a transformed version (often `log(X)` or
+  `sqrt(X)`).  (Again, this is covered in EDF 5401.)
+  
+* If the curve isn't too bad, fit the linear regression anyway, but
+  note the curve in the limitations section.  In this case, the linear
+  regression will pick up just the linear part of the relationship
+  between $X$ and $Y$.  This model tells part, but not all of the
+  story.  Remember, all models are imperfect descriptions of the real
+  world, the important part is do they capture and interesting and
+  important relationship.
+
+### 3.2 Checking for Outliers
+
+As there are two different varables in a regression, there two ways a
+data value can be an outlier.  A value which is an outlier in $X$
+(either very large or very small) is a high leverage point.  If the
+regression line is a lever arm, with the fulcrum the point at
+$(\overline X, \overline Y)$, then moving the outlier in $X$ may shift
+the regression line by a large amount. So this is called an
+_influential point_ or a _leverage point_.  This can be a problem if a
+couple of individuals which are not typical of the population are
+driving the calculation of the sloope.
+
+The second kind of outlier is one in the $Y$ direction.  Here the
+question is not just is it high or low, but how far away from the
+regression line is it.  Points that are outliers in this sense are
+ones that just don't fit the regression model very well.  Following up
+with these points can help identify data entry errrors.  They can also
+identify individuals who are interesting for other reasons.  
+
+A simple example might help here.  Generally, by the time students
+reach upper elementary or middle school age, there is a fairly high
+correlation between there skills at decoding (phonics) and
+comprehension.  Dyslexics are an exception to that rule.  They are
+interesting educationally, becuase the respond to different types of
+reading instruction.
+
+To identify outliers in SPSS click the cross-hairs icon in the SPSS Plot
+Editor to turn your cursor into an identification tool. You can click on
+any data point to make its case number[^2] appear and disappear. Use
+this procedure to look for outliers. 
+
+Once the outlier is identified, the problem becomes what to do about
+it.  There are several solutions:
+
+* If the outlier can be traced to a data entry error, it can either be
+  fixed (if there is still access to the raw data) or dropped.
+  
+* The outlier might clearly belong to a different population.  For
+  example, the outlier might be a person with limited English
+  proficiency, so they might not have understood the question
+  properly.  They can be excluded, but only by _redefining the
+  population_; for example, while before the population of interest
+  was college students, it now might be college students who are
+  proficient in English.
+  
+* Sometimes there is no reason to eliminate the outlier, but it could
+  still be influential.  Then the analyst can perform a _sensitivity
+  analysis_ by removing the outlier, running the analysis again and
+  then comparing a key summary statistic (e.g., the correlation or
+  slope of the regression line).  If they are similar, then the
+  outlier can be safely ignored.  If they are different, then the
+  outlier becomes a potential limitation of the study.
+
+
+
+## 3.3 Multigroup Scatterplots
+
+
+
+Finally, we want to check to see if the year in school makes any
+difference. To do this we want to color the groups with different
+plotting symbols. Add the Year variable to the "Markers" box. This will
+produce a plot where they are different colors. To change the plotting
+symbols, select the data points in the legend and double click on them.
+\[This is good practice because while the colored points look fine on
+the screen (for people with full color vision), the distinction between
+colors disappears when the graph is printed on a black and white
+printer.\] This will open a dialog where you can change their shape as
+well as their color. Now look at the pattern. Do all of the groups
+follow the same general pattern, or are the groups visibly separate?
+
+## 4. Correlations
+===============
+
+To calculate the correlations, us the command [A]{.underline}nalyze \>
+[C]{.underline}orrelate \> [B]{.underline}ivariate...\[ALT+A C B\]. What
+is the correlation between the two scores of interest?
+
+Normally, APA style would have us report the *p*-values and the same
+sizes along with the correlations. Don't bother with the *p*-values, as
+we haven't covered them in class yet, but do report the sample sizes.
+Are the sample sizes different? If so, why? Is that difference likely to
+affect the outcome?
+
+5. Simple Linear Regression
+===========================
+
+Linear regression in SPSS is done through the menu item
+[A]{.underline}nalyze \> [R]{.underline}egression \>
+[L]{.underline}inear\...\[Alt+A R L\]. In this dialog you select the
+dependent variable and one or more predictor (independent) variables.
+You can also add case labels (the names of states) and these will be
+used in the diagnostic plots.
+
+The Statistics\... button provides a pop-up dialog in which you can
+select various statistics about the regression. In particular, you will
+want confidence intervals for the coefficients and model fit statistics.
+
+The Plots\... button (called "Diagnostics" in some older versions of
+SPSS) provides a pop-up dialog in which you can select plots. Checking
+"Histogram" will get you a histogram of the residuals[^3]. You can add
+diagnostic plots using this dialog box. Select a variable for the
+*x*-and *y*-axis and then hit next to get the opportunity to select
+another plot. The plot that I like best is the residuals versus
+predicted values. Select \*ZPRED (the standardized predicted values) and
+move this to the *x*-axis, and select \*ZRESID (the standardized
+residual values) and move this to the *y*-axis.
+
+The Save\... button provides a pop-up dialog that allows you to save
+predicted values and residuals. The Unstandardized predicted values are
+the values you would get if you computed the predicted value using the
+estimated slope and intercept from the full sample. (Russell also likes
+the Adjusted predicted values, which are from the regression line that
+leaves out the point being predicted -- you can try these out, to see
+which are helpful to you.) You will also want a prediction interval for
+the individual predictions. Finally, saving some kind of residual will
+allow you to make additional plots. The standardized residuals are the
+most useful.
+
+The Options\... dialog has options relevant to multiple linear
+regression and missing values. We don't need to worry about it.
+
+Look at the output and check the correlation. Is the relationship strong
+or weak? Is it plausible to believe that there is a linear relationship
+between the two scores? Are you concerned about any points?
+
+6. Diagnostics 
+==============
+
+One of the first assumptions of least squares regression is that the
+residuals are approximately normally distributed. This can be tested
+with a histogram of the residuals. To do this in SPSS you need to save
+the residuals (either the raw residuals or the standardized residuals
+for this test) when doing the regression.
+
+A problem with the plots generated by SPSS is that if you use Case
+labels all of the points are labeled. This makes the plot busy and
+difficulty to read. Turn off the labels as described above then select
+the cross-hair data labeling mode button. You can now pick out points
+that look unusual to label. Also, don't forget to add Labels for your
+variables. This will give you human readable labels on the *x-* and
+*y-axes*. If you did forget, you can always double click on the axis
+label in the graph editor to produce a better label.
+
+The second assumption is that all of the residuals have approximately
+the same variance. We can test this with a fitted value versus residual
+plot. For this we want the standardized residuals and the predicted
+values. We can either do this from the saved values or we can request it
+through the regression dialog.
+
+The residual versus predicted plot contains a lot of information. First,
+if any of the residuals is particularly large (or small) we suspect an
+outlier. Secondly, if we can detect a curved pattern, then that is an
+indication that the linear regression is not explaining all that is
+happening. There may be some higher order polynomial effect. Third, we
+can identify heteroscedasticity (to check the homogeneity of residual
+variances). This usually results in a triangle shape pattern for the
+residuals: residuals on the left are larger in magnitude than the ones
+on the right (or the other way around). If you go on to take EDF 5401
+you will learn more about heteroscedasticity and what to do about it.
+
+If you detect outliers, you may wish to re-run the analysis without the
+outliers. If the conclusions are substantially different, you should
+report both conclusions.
+
+7. Predicting Future Observations
+=================================
+
+The last part of the lab requires you to assess how well the model
+predicts the general anxiety scores from the hyperactive impulse scores.
+To do this, you will need to save predicted values in the regression
+dialog. There are several different varieties of predicted values, but
+the best one for our purposes is the "Adjusted" predictions. These refit
+the model without each value in turn and then use that model to predict
+the data point that was left out. For example, the prediction for *617*
+is made using all of the data points except *617* in fitting the
+regression line.
+
+One of the fundamental rules of statistics is that we should always be
+honest about how much we know and how much we don't know. Thus, along
+with our prediction, we should say something about the accuracy of our
+prediction. Statisticians usually do this by producing an interval
+estimate. They pick a probability (usually 95%) and produce an interval
+that should contain the actual value with that probability.[^4]
+
+SPSS will calculate both the predicted value and a prediction interval;
+however, it offers a choice of two different prediction intervals. This
+is because there are two sources of prediction errors. Suppose we were
+interested in the mean anxiety score for students who scored exactly 12
+on the hyperactivity impulse scale. Our prediction would be the point on
+the regression line corresponding to *X* = 12. However, there is some
+sampling error in the slope and the intercept, so we have a confidence
+interval around where the point should be. This is the "mean" type
+prediction interval produced by SPSS.
+
+If we are interested in a particular student with that score, then we
+also need to consider the fact that most data points don't lie exactly
+on the line. The residual variance gives us the amount of additional
+error we need to add to our intervals. The "individual" style intervals
+in SPSS add this extra variance. These are the ones that we want.
+
+![](media/image1.png){width="4.697916666666667in"
+height="7.166666666666667in"}
+
+*Figure 1. SPSS Regression Save... dialog with best choices for this
+lab.*
+
+If you set up the "Save..." dialog in SPSS on our regression as shown in
+Figure 1, you should get the following four new variables in your data
+view:
+
+-   PRE\_1 -- this is the exact value (on the transformed scale if you
+    transformed the outcome) predicted by the line.
+
+-   RES\_1 -- this is the residual (difference from the predicted value)
+    for each school.
+
+-   LCI\_1 -- lower prediction (confidence) interval for each state.
+    This is the lower bound on our uncertainty about the prediction.
+
+-   UCI\_1 -- upper prediction (confidence) interval for each state.
+    This is the upper bound on our uncertainty about the prediction.
+
+Each time you run the regression using the "Save..." option, you will
+get a new set of residuals and predicted values. SPSS will increment the
+number so "\_1" is from the first regression model, "\_2" is from the
+second and so on. You probably will want to name the saved variables
+IMMEDIATELY after you run each model, or soon you will forget what all
+of the saved items are!! Once you have done that, getting the prediction
+for a particular student is simple. Just scroll down in the data until
+you get to that student\'s row and look across for the PRE\_k (or
+ADJ\_k) column (point prediction) and LCI\_k and UCI\_k columns (lower
+and upper bounds for confidence interval).
+
+6. The Assignment
+=================
+
+The assignment is to analyze the data Alec-5400Subset.csv to find if
+there is a linear relationship between the hyperactive impulse scores
+(hyper) and the general anxiety scores (GADD). You write up should
+address the five questions given in Section 1.
+
+Your write up should be no more than 2 -- 4 double spaced pages (PLUS
+your tables and figures). You should also follow the general outline of
+a scientific journal article:
+
+-   *Introduction* -- State briefly what you are studying and why
+    somebody might care.
+
+-   *Background (Minimal for this lab)* -- A brief summary of the
+    Prevatt et al. (2015) data collection.
+
+-   *Problem statement/Hypothesis* -- You need a clear statement of the
+    problem you are tackling. Additionally you can form a hypothesis --
+    a prediction about what you will find. A formal paper usually
+    requires both, but for the lab you can get by with just one of the
+    two. *A missing, buried or unclear problem statement will result in
+    lost style points.*
+
+-   *Data description/Measures* -- Here you should talk about what the
+    variables are and what they represent. *Don't forget a reference to
+    where the data come from!* Also talk about *who* is included in the
+    data set you actually analyze. Is it both control and ADHD students,
+    or just one of those groups?
+
+-   *Results* -- For this lab you will need three parts. First you need
+    enough descriptive analysis to explain if and why you made any
+    changes to the data (such as taking logs). Second, you need to
+    describe the regression model (i.e., give the regression equation)
+    and how it fits. Finally, you will need to describe the prediction
+    of the anxiety score for Student 617 based on the hyperactivity
+    impulse score. Give both a point and an interval estimate for this
+    prediction, and describe whether or not it worked.
+
+-   *Conclusions* -- Recap the most important results and relate them
+    back to the real world. What was the answer to your research
+    question? Are there any limitations of the way the data were
+    collected or the analysis that would affect the ability to
+    generalize beyond your sample? In particular, to which population
+    does it apply (all students or ADHD students only).
+
+As before you may place figures or tables either interspersed in the
+text or at the end of the document. **Remember each figure and table
+should have a number, a caption (a clear description of what is in
+there) and should be referenced somewhere in the text. Many teams did
+not do this on the first drafts of Lab 1!!** If you don't have anything
+to say about it, why include it? *Failure to follow these guidelines
+will result in lost style points*.
+
+5. FAQs and Hints
+=================
+
+1)  *Use variable labels.* If you add text labels to your variables as
+    you create them (you can do this in the transformation dialog) the
+    plots and table will come out with more human readable labels.
+
+2)  *Do I need both histograms and boxplots?* The best way to answer
+    this question is to think of your lab report as telling a story. Do
+    the histograms and boxplots tell different stories? If yes, include
+    them both (and explain in the text the interesting observations in
+    both). If no, pick the one that tells the story the best and include
+    only that one.
+
+3)  *Is XXX an outlier I should worry about?* Not every point that shows
+    up on the extreme ends of the scatterplot is an outlier. The boxplot
+    has a built-in test for outliers, so that is a good tool for double
+    checking whether something you noted in the scatterplot is an
+    outlier or not. If you suspect outliers, another test you can make
+    is to rerun the regression excluding the potential outliers. To do
+    this, use the command [D]{.underline}ata \> [S]{.underline}elect
+    Cases... \[ALT+D S\] and select the "If..." option and write an
+    expression that will exclude the outliers, e.g., "hyper \< 35". Then
+    run the regression or correlation command again.
+
+The slope and correlation should change a little bit, but not a lot. If
+they do change a lot, then the outlier is worth mentioning. If they
+don't you could give it a passing mention (e.g., "XXX thought to be an
+outlier, but rerunning the regression with XXX excluded produced only a
+small change in the correlation and slope."), but not more. However, if
+the results change markedly, report both numbers (unless you have a
+substantial reason for thinking the outlier doesn\'t belong in the
+population). It is fairly common for students to go outlier crazy at
+this point in time, don't fall into that trap.
+
+*Here are some web sites that cover SPSS and regression that you may
+find helpful:*
+
+[[http://www.ats.ucla.edu/stat/spss/seminars/SPSSGraphics/spssgraph.htm]{.underline}](http://www.ats.ucla.edu/stat/spss/seminars/SPSSGraphics/spssgraph.htm)
+
+[[http://core.ecu.edu/psyc/wuenschk/spss/corrregr-spss.doc]{.underline}](http://core.ecu.edu/psyc/wuenschk/spss/corrregr-spss.doc)
+
+Reference
+=========
+
+Coladarci, T. & Cobb, C. D., Minium, E. W., & Clarke, R. C. (2014).
+*Fundamentals of Statistical Reasoning in Education* (4^th^ Ed.)
+Hoboken, NJ: John Wiley & Sons.
+
+Prevatt, F., Dehili, V., Taylor, N. & Marshall, D. (2015). Anxiety in
+College Students with ADHD: Relationship to Cognitive Functioning.
+*Journal of Attention Disorders*, **19**, 222-230.
+doi:10.1177/1087054712457037
+
+[^1]: These are called loess curves in SPSS.
+
+[^2]: If you have short names, like the state postal codes, and you add
+    them in the labels field when building the plot, you will get labels
+    instead of case numbers. In this data set we have nothing more
+    useful than the case numbers.
+
+[^3]: See the handout on residuals.
+
+[^4]: This is covered briefly starting on page 148 of Coladarci and Cobb
+    (2014). However, the formula given in the book is incomplete, it
+    only includes one source of uncertainty: the uncertainty due to the
+    fact that the data points are not exactly on the regression line.
+    This uncertainty is measured with the standard error of the
+    estimate. There is also an additional source of uncertainty, as we
+    have estimated the slope and intercept with a sample. The formulae
+    given in the lectures take this into account, as do the calculations
+    in SPSS. Basically, SPSS does the right think so we don\'t need to
+    worry too much about the simplification in your book.
+

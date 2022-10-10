@@ -1,0 +1,124 @@
+---
+title: "Plotting gain scores."
+output: html_notebook
+runtime: shiny
+---
+Question:  How do you make a plot such as is often seen with repeated measures ANOVA showing the gain between pretest and posttest scores.
+
+The data set ACED (see http://ecd.ralmond.net/ecdwiki/ACED/ACED) has information about an assessment for learning system called ACED.  In the ACED evaluation, students were given a 25 item pretest, used ACED and then were given a 25 item posttest.  (The pretest and posttest were counterbalanced, the scaled scores are reported here.)
+
+Two facets of the ACED system could be manipulated:
+1) Feedback:  Full worked explanations or just accuracy (right/wrong) information.
+2) Sequence:  Items presented adaptively (according to weight of evidence) or linearly (fixed sequence)
+
+An incomplete factorial with control design was used, so the accuracy linear condition was replaced with a study hall control. 
+
+First, read in the data set.  (This is slightly different from the version on the ECD wiki as the BN scores are merged in.)
+
+```{r}
+library(arm)
+ACED <- read.csv("https://pluto.coe.fsu.edu/rdemos/data/ACED5400-2.csv",na.strings="-999")
+```
+Variables:
+
+Four conditions:  Adaptive/Full, Adaptive/Accuracy, Linear/Full and Control
+Level:  Which track the students are in (Honor, Accademic, Regular, Part I and II SE, ELL)
+Pretest is 25 item pretest
+Postest is 25 item posttest
+Pre/post test were couterbalanced
+BN score is an in-game measure running from -1 to +1
+
+```{r}
+ACED$Cond_code <- factor(ACED$Cond_code,
+        labels=c("Adapt_Acc","Adapt_Full","Lin_Full","Control"))
+
+ACED$Level_Code <- factor(ACED$Level_Code,
+        labels=c("Honors","Academic","Regular","Part 1","Part 2", "ELL"))
+
+row.names(ACED) <- as.character(ACED$SID)
+
+renderTable(ACED)
+```
+Create a gain score variable:
+```{r}
+ACED$gain <- ACED$post_scaled - ACED$pre_scaled
+t.test(ACED$gain)
+t.test(ACED$gain[ACED$Cond_code!="Control"])
+t.test(ACED$gain[ACED$Cond_code=="Control"])
+```
+Lets look at some graphs.  Obvious one is boxplots:
+```{r}
+boxplot(gain~Cond_code,data=ACED)
+abline(h=0)
+```
+Look at the relationship between BN score and gain score.
+```{r}
+plot(gain~BNscore,data=ACED)
+```
+
+```{r}
+plot(gain~BNscore,data=ACED,
+     pch=as.numeric(ACED$Cond_code),
+     col=as.numeric(ACED$Cond_code))
+lm.g1 <- lm(gain~BNscore,data=ACED,
+            subset=ACED$Cond_code=="Adapt_Acc")
+display(lm.g1)
+abline(lm.g1,col=1)
+lm.g2 <- lm(gain~BNscore,data=ACED,
+            subset=ACED$Cond_code=="Adapt_Full")
+display(lm.g2)
+abline(lm.g2,col=2)
+lm.g3 <- lm(gain~BNscore,data=ACED,
+            subset=ACED$Cond_code=="Lin_Full")
+display(lm.g3)
+abline(lm.g3,col=3)
+
+
+```
+```{r}
+summary(ACED)
+```
+Anova type main effect plots
+
+```{r}
+lm.pre <- lm(pre_scaled~Cond_code,data=ACED)
+coef(lm.pre)
+pre.mean <- coef(lm.pre)[1]+c(0,coef(lm.pre)[2:4])
+lm.post <- lm(post_scaled~Cond_code,data=ACED)
+coef(lm.post)
+post.mean <- coef(lm.post)[1]+c(0,coef(lm.post)[2:4])
+pre.mean
+post.mean
+
+```
+Now plot this.
+```{r}
+## Start by laying out plot:
+plot(x=rep(c(0,1),each=4),y=c(pre.mean,post.mean),
+     xlab="",ylab="Pre/Post test score",type="n",
+     xlim=c(-1,2),xaxt="n")
+axis(1,c(0,1),labels=c("Pretest","Posttest"))
+segments(rep(0,4),pre.mean,rep(1,4),post.mean,
+         col=1:4,lty=1:4)
+legend("bottomright",legend=levels(ACED$Cond_code),
+       col=1:4,lty=1:4)
+```
+Lets turn this into a function:
+
+```{r}
+rmplot <- function (pre,post,group.labs=names(pre),
+                    ylab="Pre/Post test Scores",xlab="",
+                    prepost.labs=c("Pretest","Posttest"),
+                    col=1:length(pre),lty=1:length(pre),...){
+   g <- length(pre)
+   plot(x=rep(c(0,1),each=g),y=c(pre,post),
+       xlab=xlab,ylab=ylab,type="n",
+       xlim=c(-1,2),xaxt="n",...)
+   axis(1,c(0,1),labels=propost.labs)
+   segments(rep(0,g),pre,rep(1,g),post,
+          col=col,lty=lty)
+  legend("bottomright",legend=levels(ACED$Cond_code),
+         col=col,lty=lty)
+}
+```
+

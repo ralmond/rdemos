@@ -1,0 +1,76 @@
+s	-3	3	-3	3	20	d	
+v	sgp	Solve Geometric Problems	1	0	1		
+is	geom						
+is	geom	commonRatio					
+is	geom	examples					
+is	geom	explicit					
+is	geom	extend					
+is	geom	distinguish					
+is	geom	model					
+is	geom	recursive					
+is	geom	table					
+is	geom	verbal					
+is	geom	visual					
+i	commonRatio	sgp	CR1a	tCommonRatio1a	-1	commonRatio	6/23/06
+i	commonRatio	sgp	CR1b	tCommonRatio1b	-1	commonRatio	6/23/07
+i	commonRatio	sgp	CR2a	tCommonRatio2a	0	commonRatio	6/23/08
+i	commonRatio	sgp	CR2b	tCommonRatio2b	0	commonRatio	6/23/09
+i	commonRatio	sgp	CR3a	tCommonRatio3a	1	commonRatio	6/23/10
+i	commonRatio	sgp	CR3b	tCommonRatio3b	1	commonRatio	6/23/11
+i	examples	sgp	Examp1a	tExamplesGeometric1a	-1	examples	6/23/12
+i	examples	sgp	Examp1b	tExamplesGeometric1b	-1	examples	6/23/13
+i	examples	sgp	Examp2a	tExamplesGeometric2a	0	examples	6/23/14
+i	examples	sgp	Examp2b	tExamplesGeometric2b	0	examples	6/23/15
+i	examples	sgp	Examp3a	tExamplesGeometric3a	1	examples	6/23/16
+i	examples	sgp	Examp3b	tExamplesGeometric3b	1	examples	6/23/17
+i	explicit	sgp	Expl1a	tExplicitGeometric1a	-1	explicit	6/23/18
+i	explicit	sgp	Expl1b	tExplicitGeometric1b	-1	explicit	6/23/19
+i	explicit	sgp	Expl2a	tExplicitGeometric2a	0	explicit	6/23/20
+i	explicit	sgp	Expl2b	tExplicitGeometric2b	0	explicit	6/23/21
+i	explicit	sgp	Expl3a	tExplicitGeometric3a	1	explicit	6/23/22
+i	explicit	sgp	Expl3b	tExplicitGeometric3b	1	explicit	6/23/23
+i	extend	sgp	Ext1a	tExtendGeometric1a	-1	extend	6/23/24
+i	extend	sgp	Ext1b	tExtendGeometric1b	-1	extend	6/23/25
+i	extend	sgp	Ext2a	tExtendGeometric2a	0	extend	6/23/26
+i	extend	sgp	Ext2b	tExtendGeometric2b	0	extend	6/23/27
+i	extend	sgp	Ext3a	tExtendGeometric3a	1	extend	6/23/28
+i	extend	sgp	Ext3b	tExtendGeometric3b	1	extend	6/23/29
+i	distinguish	sgp	Dist1a	tDistinguishGeometric1a	-1	distinguish	6/23/30
+i	distinguish	sgp	Dist1b	tDistinguishGeometric1b	-1	distinguish	6/23/31
+i	distinguish	sgp	Dist2a	tDistinguishGeometric2a	0	distinguish	6/23/32
+i	distinguish	sgp	Dist2b	tDistinguishGeometric2b	0	distinguish	6/23/33
+i	distinguish	sgp	Dist3a	tDistinguishGeometric3a	1	distinguish	6/23/34
+i	distinguish	sgp	Dist3b	tDistinguishGeometric3b	1	distinguish	6/23/35
+i	model	sgp	MExtT1a	tModelExtendTableGeometric1a	-1	model	6/23/36
+i	model	sgp	MExtT1b	tModelExtendTableGeometric1b	-1	model	6/23/37
+i	model	sgp	MExtT2a	tModelExtendTableGeometric2a	0	model	6/23/38
+i	model	sgp	MExtT2b	tModelExtendTableGeometric2b	0	model	6/23/39
+i	model	sgp	MExtT3a	tModelExtendTableGeometric3a	1	model	6/23/40
+i	model	sgp	MExtT3b	tModelExtendTableGeometric3b	1	model	6/23/41
+i	recursive	sgp	RR1a	tRecursiveRuleGeometric1a	-1	recursive	6/23/42
+i	recursive	sgp	RR1b	tRecursiveRuleGeometric1b	-1	recursive	6/23/43
+i	recursive	sgp	RR2a	tRecursiveRuleGeometric2a	0	recursive	6/23/44
+i	recursive	sgp	RR2b	tRecursiveRuleGeometric2b	0	recursive	6/23/45
+i	recursive	sgp	RR3a	tRecursiveRuleGeometric3a	1	recursive	6/23/46
+i	recursive	sgp	RR3b	tRecursiveRuleGeometric3b	1	recursive	6/23/47
+i	table	sgp	TExt1a	tTableExtendGeometric1a	-1	table	6/23/48
+i	table	sgp	TExt1b	tTableExtendGeometric1b	-1	table	6/23/49
+i	table	sgp	TExt2a	tTableExtendGeometric2a	0	table	6/23/50
+i	table	sgp	TExt2b	tTableExtendGeometric2b	0	table	6/23/51
+i	table	sgp	TExt3a	tTableExtendGeometric3a	1	table	6/23/52
+i	table	sgp	TExt3b	tTableExtendGeometric3b	1	table	6/23/53
+i	verbal	sgp	VRExpl2a	tVerbalRuleExplicitModelGeometric2a	0	verbal	6/23/54
+i	verbal	sgp	VRExpl3a	tVerbalRuleExplicitModelGeometric3a	1	verbal	6/23/55
+i	verbal	sgp	VRExt1a	tVerbalRuleExtendModelGeometric1a	-1	verbal	6/23/56
+i	verbal	sgp	VRExt1b	tVerbalRuleExtendModelGeometric1b	-1	verbal	6/23/57
+i	verbal	sgp	VRExt2a	tVerbalRuleExtendModelGeometric2a	0	verbal	6/23/58
+i	verbal	sgp	VRM3a	tVerbalRuleModelGeometric3a	1	verbal	6/23/59
+i	visual	sgp	VExplVRM3a	tVisualExplicitVerbalRuleModelGeometric3a	1	visual	6/23/60
+i	visual	sgp	VExplVRM3b	tVisualExplicitVerbalRuleModelGeometric3b	1	visual	6/23/61
+i	visual	sgp	VExt1a	tVisualExtendGeometric1a	-1	visual	6/23/62
+i	visual	sgp	VExt1b	tVisualExtendGeometric1b	-1	visual	6/23/63
+i	visual	sgp	VExt1c	tVisualExtendGeometric1c	-1	visual	6/23/64
+i	visual	sgp	VExt2a	tVisualExtendGeometric2a	0	visual	6/23/65
+i	visual	sgp	VExt3a	tVisualExtendGeometric3a	1	visual	6/23/66
+i	visual	sgp	VETMVR2a	tVisualExtendTableModelVerbalRuleGeometric2a	0	visual	6/23/67
+i	visual	sgp	VEVRM2a	tVisualExtendVerbalRuleModelGeometric2a	0	visual	6/23/68

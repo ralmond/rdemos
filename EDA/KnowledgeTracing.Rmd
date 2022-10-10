@@ -1,0 +1,209 @@
+---
+title: "Knowledge Tracing:  Jackknife, Bootstrap and Cross Validation"
+author: "Russell Almond"
+date: "1/12/2022"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(DiagrammeR)
+
+## This is syntaxtic sugar, so I can use this idiom in a pipe.
+applyappend <- function(listOfData)
+  do.call(rbind,listOfData)
+
+
+```
+
+## Knowledge Tracing Model
+
+Corbett and Anderson (1995)
+
+Hidden Markov Model
+
+Markov means past is independent of future given present.
+
+Hidden means one variable is latent.
+
+```{r hmm-dot, fig.cap="Knowledge Tracing (Hidden Markov) model"}
+DiagrammeR::grViz("digraph hmm {
+
+graph[layout=dot]
+
+node[shape=circle]
+subgraph hidden {
+  rank=min;
+  L0; L1; L2; L3; L4; L5
+  L0 -> L1 -> L2 -> L3 -> L4 -> L5
+}
+
+X0; X1; X2; X3; X4; X5
+L0 -> X0; L1 -> X1; L2 -> X2; L3 -> X3; L4 -> X4; L5->X5;
+
+}")
+
+```
+
+
+$i$ represents opportunity to practice Knowledge, Skill or Ability (KSA)
+
+$L_i=1$ is mastery, $L_i=0$ is non-mastery at Time $i$
+
+$X_i$ is response at $i$th opportunity (1=success, 0=failure)
+
+[Knowledge Tracing App](https://catherinesyeh.github.io/bkt-balloon/)
+
+## Parameters of the Knowledge Tracing Model
+
+
+
+* Assumption 1:  No forgetting -- $L_{i+1} \ge L_i$
+
+* Assumption 2: Constant learning rate $P(L_{i+1}=1|L_i=0) = p(T)$, `learn`
+
+* Assumption 3: Constant item parameters
+
+ - `guess` $P(X_i=1|L_i=0)$
+ 
+ - `slip` $P(X_i=0|L_i=1)$
+ 
+ Need one more parameter, $P(L_0=1)$, `init`
+ 
+## Stopping Rule (Russell Addition)
+
+Original Corbett and Anderson paper assumed all students do same number of practices.
+
+This simulation is based on a tutoring system, where students can work on as many examples as they like.
+
+- `quit0` $P(quit|L_i=0)$
+
+- `quit1` $P(quit|L_i=1)$
+
+```{r generator}
+
+simkt <- function(id=0,init=.5,learn=.25,
+                  guess=.2,slip=.2,
+                  quit0=.1,quit1=.25) {
+  result <- numeric() # Result vector
+  mastery <- runif(1) < init
+  mvec <- numeric()
+  done <- FALSE
+  while (!done) {
+    mvec <- c(mastery,mvec)
+    result <- c(
+      runif(1) < ifelse(mastery,1-slip,guess),
+      result)
+    if (!mastery) mastery <- runif(1) < learn
+    done <- runif(1) < ifelse(mastery,quit1,quit0)
+  }
+  data.frame(id=id,
+             trial=1:length(result),
+             result=rev(result),
+             mastery=rev(mvec))
+}
+simkt(-1)
+```
+   
+## Now generate sample data
+
+Use `lapply` as this makes it easier to make things parallel;  load `parallel` package and use `mclappy` instead of `lapply`.
+
+Wrap call to `simkt` in an anonymous function to make changing the parameters easier.
+
+The `do.call(rbind,...)` trick glues the data together.
+
+```{r generate}
+N <- 100
+lapply(1:N,
+       function (id) {
+         simkt(id)
+       }) %>% applyappend -> simktdat
+```
+
+
+## Learning curve
+
+Plot trial versus error rate.
+
+```{r learning curve}
+errRate <- function (trials,results) {
+  utrials <- sort(unique(trials))
+  er <- sapply(utrials, function (tri) 
+    1 - sum(results[trials==tri])/sum(trials==tri))
+  data.frame(Trial=utrials,ErrorRate=er)
+}
+errrate <- errRate(simktdat$trial,simktdat$result)
+```
+```{r traceplot}
+ggplot(errrate,aes(Trial,ErrorRate))+geom_point()+geom_line()+
+    labs(title="Knowledge Trace Standard Errors.")
+
+```
+
+## Jackknife Error Bars
+
+```{r jackknife errors}
+subjects <- unique(simktdat$id)
+maxtrials <- nrow(errrate)
+lapply(subjects, function( subj) {
+    jdat <- filter(simktdat,id!=subj) 
+    er <- errRate(pull(jdat,"trial"),
+                pull(jdat,"result"))
+    if (nrow(er) < maxtrials) {
+      ## Pad out extra rows in matrix if needed.
+      er <- add_row(er,Trial=(nrow(er)+1):maxtrials)
+    }
+    pull(er,"ErrorRate")
+}) %>% applyappend -> jest
+
+upper <- apply(jest,2,quantile,probs=.95,na.rm=TRUE)
+lower <- apply(jest,2,quantile,probs=.05,na.rm=TRUE)
+errrate %>%add_column(JackUpper=upper,JackLower=lower) -> errrate
+```
+  
+Now add them to the plot:
+
+```{r traceplotJack}
+ggplot(errrate,aes(Trial,ErrorRate))+
+  geom_pointrange(aes(ymin=JackLower,ymax=JackUpper))+
+  geom_line() +
+  labs(title="Knowledge Trace with Jackknife Standard Errors.")
+
+```
+
+## Bootstrap standard errors
+
+```{r bootstrap errors}
+subjects <- unique(simktdat$id)
+maxtrials <- nrow(errrate)
+B <- 100
+lapply(1:B, function(b) {
+    bdat <- slice_sample(simktdat,prop=1,replace=TRUE) 
+    er <- errRate(pull(bdat,"trial"),
+                pull(bdat,"result"))
+    if (nrow(er) < maxtrials) {
+      ## Pad out extra rows in matrix if needed.
+      er <- add_row(er,Trial=(nrow(er)+1):maxtrials)
+    }
+    pull(er,"ErrorRate")
+}) %>% applyappend -> best
+
+upper <- apply(best,2,quantile,probs=.95,na.rm=TRUE)
+lower <- apply(best,2,quantile,probs=.05,na.rm=TRUE)
+errrate %>%add_column(BootUpper=upper,BootLower=lower) -> errrate
+```
+
+Now Graph it.
+
+```{r traceplotBoot}
+ggplot(errrate,aes(Trial,ErrorRate))+
+  geom_pointrange(aes(ymin=BootLower,ymax=BootUpper))+
+  geom_line() +
+  labs(title="Knowledge Trace with Bootstrap Standard Errors.")
+```
+
+
+

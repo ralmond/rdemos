@@ -1,0 +1,58 @@
+---
+title: "Gellman and Hill 13.2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+_Models for adjusting individual ratings:  a committee of 10 persons is evaluating 100 job applicants.  Each person on the committee reads 30 applications (structured so that each application is read by 3 people) and gives a numerical rating between 1 and 10._
+
+_(a) It would be nautal to rate the applications based on their combined scores; however, there is aworry that different raters use different standards (severity) and we would like to correct for this.  Set up a model for the ratings (with parameters for the applicants and the raters)._
+
+### Problem setup 
+theta[i] -- Ability of Applicant i
+
+eta[j] -- Severity of Rater j
+
+epsilon[i,j] -- measurement error
+
+Y[i,j] = theta[i]+eta[j] +epsilon[i,j]
+
+Score ~ (1 | applicant) + (1 | rater)
+
+### Design Matrix
+
+There are `r choose(10,3)` ways of assigning 3 raters, so more patterns than we have rows.
+
+```{r}
+I <- 100L # applicants
+J <- 10L  # raters
+W <- 3L   # ratings per applicant
+assignment <- matrix(0L,I,J)
+for (i in 1L:I) {
+  workload <- colSums(assignment)
+  available <- which (workload < W*J)
+  if (i > 75L)
+    cat("Round ",i,": available = ",
+        paste(available,collapse=", "),"\n")
+  while (length(available) < W) {
+    slacker <- which.min(workload)
+    pswaps <- which(!assignment[1L:(i-1L),slacker])
+    swaprow <- sample(pswaps,1L)
+    swapcol <- sample(which(as.logical(assignment[swaprow,])))
+    assignment[swaprow,swapcol] <- 0L
+    assignment[swaprow,slacker] <- 1L
+    workload <- colSums(assignment)
+    available <- which(workload < W*J)
+    cat("Round ",i,"x: availble=",paste(available,collapse=", "),
+        "\n")
+  } 
+  assignment[i,sample(available,W)] <- 1L
+}
+colSums(assignment)
+head(assignment)
+```
+
+
